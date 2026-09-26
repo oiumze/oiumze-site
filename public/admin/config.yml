@@ -3,6 +3,10 @@
 backend:
   name: github
   repo: oiumze/oiumze-site
+  branch: main
+  # OAuth via Vercel functions (src/pages/api). Trocar pelo domínio final quando houver.
+  base_url: https://oiumze-site.vercel.app
+  auth_endpoint: api/auth
 
 media_folder: /public/uploads
 public_folder: /uploads
