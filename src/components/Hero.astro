@@ -1,0 +1,23 @@
+---
+interface Props {
+	id?: string;
+	title?: string;
+}
+
+const { id = 'inicio', title = 'Início' } = Astro.props;
+---
+
+<section id={id} class="relative isolate min-h-screen scroll-mt-14 overflow-hidden px-6 py-16 lg:px-12">
+	<!-- imagem de fundo: <img> com srcset (1x/2x) em vez de background-image para o navegador escolher a densidade e priorizar o carregamento (LCP) -->
+	<img
+		src="/images/hero-01.png"
+		srcset="/images/hero-01.png 1x, /images/hero-01@2x.png 2x"
+		width="1440"
+		height="968"
+		alt=""
+		fetchpriority="high"
+		decoding="async"
+		class="absolute inset-0 -z-10 size-full object-cover"
+	/>
+	<h2 class="font-righteous text-4xl uppercase">{title}</h2>
+</section>

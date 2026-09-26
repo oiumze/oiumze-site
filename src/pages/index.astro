@@ -1,11 +1,20 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const sections = [
+	{ id: 'sobre', title: 'Sobre' },
+	{ id: 'meu-som', title: 'Meu Som' },
+	{ id: 'galeria', title: 'Galeria' },
+	{ id: 'imprensa', title: 'Imprensa' },
+];
 ---
 
 <Layout>
-	<Welcome />
+	<Hero />
+	{sections.map(({ id, title }) => (
+		<section id={id} class="min-h-screen scroll-mt-14 px-6 py-16 lg:px-12">
+			<h2 class="font-righteous text-4xl uppercase">{title}</h2>
+		</section>
+	))}
 </Layout>
