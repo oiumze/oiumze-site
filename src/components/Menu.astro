@@ -10,17 +10,18 @@ const links = [
 const linkClass = 'hover:underline underline-offset-4 aria-[current=location]:text-yellow-strong aria-[current=location]:underline';
 ---
 
-<div class="drawer drawer-end" data-scrollspy>
+<header class="drawer drawer-end" data-scrollspy>
   <input id="menu-drawer" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content">
     <div class="fixed inset-x-0 top-0 z-10 bg-black text-yellow-light shadow-sm px-6 lg:px-12">
-      <div class="navbar mx-auto max-w-[1200px] px-0">
+      <div class="navbar min-h-14 mx-auto max-w-[1200px] px-0">
         <div class="navbar-start w-auto">
+          <h1 class="sr-only">Umzé</h1>
           <a href="/#inicio" class="block shrink-0">
             <img
               src="/images/logo/logo.png"
               srcset="/images/logo/logo.png 1x, /images/logo/logo@2x.png 2x, /images/logo/logo@3x.png 3x"
-              alt="Umzé"
+              alt="Ir para o início"
               width="47"
               height="38"
               class="block"
@@ -28,9 +29,11 @@ const linkClass = 'hover:underline underline-offset-4 aria-[current=location]:te
           </a>
         </div>
         <div class="navbar-end flex-1">
-          <ul class="hidden lg:flex gap-18 whitespace-nowrap font-righteous text-xl uppercase">
-            {links.map(({ href, label }) => <li><a href={href} class={linkClass}>{label}</a></li>)}
-          </ul>
+          <nav aria-label="Menu principal" class="hidden lg:block">
+            <ul class="flex gap-18 whitespace-nowrap font-righteous text-xl uppercase">
+              {links.map(({ href, label }) => <li><a href={href} class={linkClass}>{label}</a></li>)}
+            </ul>
+          </nav>
           <label for="menu-drawer" aria-label="Abrir menu" class="btn btn-ghost lg:hidden">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
           </label>
@@ -40,16 +43,16 @@ const linkClass = 'hover:underline underline-offset-4 aria-[current=location]:te
   </div>
   <div class="drawer-side z-20 lg:hidden">
     <label for="menu-drawer" aria-label="Fechar menu" class="drawer-overlay"></label>
-    <div class="min-h-full w-64 bg-black text-yellow-light p-6">
+    <nav aria-label="Menu principal" class="min-h-full w-64 bg-black text-yellow-light p-6">
       <label for="menu-drawer" aria-label="Fechar menu" class="btn btn-ghost btn-square mb-6 ml-auto flex">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /> </svg>
       </label>
       <ul class="flex flex-col gap-6 font-righteous text-xl uppercase">
         {links.map(({ href, label }) => <li><a href={href} class={linkClass}>{label}</a></li>)}
       </ul>
-    </div>
+    </nav>
   </div>
-</div>
+</header>
 
 <script>
   const nav = document.querySelector('[data-scrollspy]');
