@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* static: sempre gera as variáveis, mesmo sem classe usando, pois o tema do daisyUI referencia elas */
+@theme static {
+  /* Cores base */
+  --color-white: #fff;
+  --color-black: #000;
+
+  /* Paleta de cores */
+  --color-yellow-strong: #f2cb05; /* cor1 */
+  --color-blue-dark: #252759; /* cor2 */
+  --color-red: #d90416; /* cor3 */
+  --color-yellow-light: #f2efbd; /* cor4 */
+  --color-orange: #d98218; /* cor5 */
+  --color-blue-light: #009ae2; /* cor6 */
+
+  /* Fontes (carregadas do Google Fonts no Layout.astro) */
+  --font-righteous: "Righteous", sans-serif;
+  --font-reddit-sans: "Reddit Sans", sans-serif;
+  --font-sans: var(--font-reddit-sans); /* fonte padrão do site */
+}
+
+@plugin "daisyui/theme" {
+  name: "umze";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: var(--color-yellow-light);
+  --color-base-200: color-mix(in oklab, var(--color-yellow-light) 94%, var(--color-black));
+  --color-base-300: color-mix(in oklab, var(--color-yellow-light) 88%, var(--color-black));
+  --color-base-content: var(--color-blue-dark);
+
+  --color-primary: var(--color-blue-dark);
+  --color-primary-content: var(--color-white);
+  --color-secondary: var(--color-red);
+  --color-secondary-content: var(--color-white);
+  --color-accent: var(--color-yellow-strong);
+  --color-accent-content: var(--color-blue-dark);
+  --color-neutral: var(--color-black);
+  --color-neutral-content: var(--color-white);
+
+  --color-info: var(--color-blue-light);
+  --color-info-content: var(--color-blue-dark);
+  /* paleta não tem verde: mantém o success padrão do daisyUI */
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(37% 0.077 168.94);
+  --color-warning: var(--color-orange);
+  --color-warning-content: var(--color-black);
+  --color-error: var(--color-red);
+  --color-error-content: var(--color-white);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
