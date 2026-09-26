@@ -3,6 +3,10 @@
 backend:
   name: github
   repo: oiumze/oiumze-site
+  branch: main
+  # OAuth via Vercel functions (src/pages/api). Trocar pelo domínio final quando houver.
+  base_url: https://oiumze-site.vercel.app
+  auth_endpoint: api/auth
 
 media_folder: /public/uploads
 public_folder: /uploads
@@ -12,14 +16,16 @@ collections:
     label: Posts
     label_singular: Post
     folder: /content/posts
+    create: true
     fields:
       - { label: Title, name: title, widget: string }
-      - { label: Date, name: date, widget: datetime, type: date }
+      - { label: Date, name: date, widget: datetime, time_format: false }
       - { label: Body, name: body, widget: richtext }
   - name: gallery
     label: Galeria de Fotos
     label_singular: Foto
     folder: /content/gallery
+    create: true
     fields:
       - { label: Título, name: title, widget: string }
       - { label: Imagem, name: image, widget: image }
