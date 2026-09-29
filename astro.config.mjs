@@ -14,5 +14,9 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    // Project lives on /mnt/c (Windows disk under WSL2): inotify events don't cross over, so poll for changes.
+    server: {
+      watch: { usePolling: true, interval: 300 },
+    },
   },
 });
