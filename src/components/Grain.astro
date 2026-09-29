@@ -1,0 +1,79 @@
+---
+// Grão de filme antigo sobre o site inteiro: ruído SVG (feTurbulence) em tile, misturado
+// com overlay (modula a luminância do que está embaixo, como grão de foto, sem véu claro)
+// e deslocado para posições aleatórias a cada quadro, sem loop, para parecer natural.
+// Com mouse, um círculo em volta do cursor mostra o site sem grão (mask-image).
+// Não captura cliques e fica parado com prefers-reduced-motion.
+// Parâmetros em src/lib/grain.ts.
+import { grainDefaults, grainStyle } from '../lib/grain';
+---
+
+<!-- Container parado do tamanho da tela: leva blend, opacidade e a máscara do cursor
+     (mix-blend-mode precisa estar no elemento que cria o contexto de empilhamento).
+     O filho com a textura só se move por transform: vira uma camada da GPU rasterizada
+     uma vez, sem repintar a tela a cada quadro. -->
+<div
+	id="grain"
+	aria-hidden="true"
+	data-fps={grainDefaults.fps}
+	class="grain pointer-events-none fixed inset-0 z-[9999] overflow-hidden"
+	style={grainStyle(grainDefaults)}
+>
+	<div class="grain-noise"></div>
+</div>
+
+<style>
+	.grain {
+		/* fora da tela até o mouse entrar, então sem buraco no touch */
+		--mx: -9999px;
+		--my: -9999px;
+		--hole: radial-gradient(
+			circle at var(--mx) var(--my),
+			transparent calc(var(--grain-hole) * (1 - var(--grain-feather))),
+			black var(--grain-hole)
+		);
+		-webkit-mask-image: var(--hole);
+		mask-image: var(--hole);
+	}
+
+	/* 1 tile a mais para cada lado: qualquer salto de 0 a 1 tile ainda cobre a tela */
+	.grain-noise {
+		position: absolute;
+		inset: calc(-1 * var(--grain-tile));
+		background-image: var(--grain-noise);
+		will-change: transform;
+	}
+</style>
+
+<script>
+	const grain = document.getElementById('grain');
+	const noise = grain?.querySelector<HTMLElement>('.grain-noise');
+	const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+	// Saltos aleatórios: a cada quadro a textura vai para um offset qualquer dentro de
+	// um tile, então o padrão nunca se repete.
+	let last = 0;
+	function frame(now: number) {
+		requestAnimationFrame(frame);
+		const fps = Number(grain?.dataset.fps);
+		// -2ms de folga: sem ela, o jitter do rAF (16.6 vs 16.7ms) derruba 60fps para 30
+		if (!grain || !noise || reduced.matches || !fps || now - last < 1000 / fps - 2) return;
+		last = now;
+		const tile = parseFloat(grain.style.getPropertyValue('--grain-tile')) || 0;
+		const x = Math.round(Math.random() * tile);
+		const y = Math.round(Math.random() * tile);
+		noise.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+	}
+	requestAnimationFrame(frame);
+
+	// Círculo sem grão seguindo o mouse (ignora toque/caneta).
+	addEventListener('pointermove', (e) => {
+		if (!grain || e.pointerType !== 'mouse') return;
+		grain.style.setProperty('--mx', `${e.clientX}px`);
+		grain.style.setProperty('--my', `${e.clientY}px`);
+	});
+	document.documentElement.addEventListener('mouseleave', () => {
+		grain?.style.setProperty('--mx', '-9999px');
+		grain?.style.setProperty('--my', '-9999px');
+	});
+</script>
