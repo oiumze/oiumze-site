@@ -60,3 +60,8 @@
   --depth: 1;
   --noise: 0;
 }
+
+/* seção ocupa a tela menos o menu fixed (min-h-14 = 3.5rem no Menu.astro) */
+@utility min-h-section {
+  min-height: calc(100svh - 3.5rem);
+}
