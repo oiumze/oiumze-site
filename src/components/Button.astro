@@ -1,0 +1,24 @@
+---
+// Botão padrão do site (contorno): texto branco em caixa alta (Reddit Sans semibold, 2× a fonte do menu: text-xl = 40px),
+// sem fundo, borda amarelo claro de 3px, cantos retos e padding justo.
+// Hover/toque: mesma animação dos botões do Sobre (RollButton) — faixa amarelo claro sobe por dentro e as letras
+// rolam para a versão preta.
+import type { HTMLAttributes } from 'astro/types';
+import RollButton from './RollButton.astro';
+
+interface Props extends HTMLAttributes<'a'> {
+	label: string;
+}
+
+const { label, class: className, ...attrs } = Astro.props;
+---
+
+<RollButton
+	label={label}
+	bg="transparent"
+	fg="var(--color-white)"
+	hoverBg="var(--color-yellow-light)"
+	hoverFg="var(--color-black)"
+	class={['border-3 border-yellow-light px-3 py-1 font-reddit-sans text-[calc(var(--text-xl)*2)] font-semibold', className].filter(Boolean).join(' ')}
+	{...attrs}
+/>

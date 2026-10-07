@@ -16,6 +16,8 @@ export interface GrainConfig {
 	blend: string;
 	/** Saltos aleatórios por segundo (0 = parado). */
 	fps: number;
+	/** Saltos por segundo em telas de toque (celular): mais leve para GPUs fracas. */
+	fpsTouch: number;
 	/** Raio do círculo sem grão em volta do cursor, em px (0 = desligado). */
 	holeRadius: number;
 	/** Fração do raio usada como borda suave (0 = borda dura, 1 = degradê do centro). */
@@ -34,12 +36,13 @@ export const grainDefaults: GrainConfig = {
 	// como grão de foto — normal/hard-light jogam um véu claro sobre áreas escuras
 	blend: 'overlay',
 	fps: 30,
+	fpsTouch: 12,
 	holeRadius: 60,
 	holeFeather: 0.15,
 };
 
-/** `url(...)` com o SVG de ruído, pronto para `background-image`. */
-export function grainNoiseUrl(c: GrainConfig): string {
+/** SVG de ruído com primitivas extras no fim do filtro, como `url(...)`. */
+function noiseUrl(c: GrainConfig, extra = ''): string {
 	const intercept = (1 - c.slope) / 2;
 	const fn = (ch: string) => `<feFunc${ch} type='linear' slope='${c.slope}' intercept='${intercept}'/>`;
 	const svg =
@@ -50,10 +53,24 @@ export function grainNoiseUrl(c: GrainConfig): string {
 		// feTurbulence também gera ruído no alpha; forçar opaco deixa o grão uniforme
 		`<feColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1'/>` +
 		`<feComponentTransfer>${fn('R')}${fn('G')}${fn('B')}</feComponentTransfer>` +
+		extra +
 		`</filter>` +
 		`<rect width='100%' height='100%' filter='url(#n)'/>` +
 		`</svg>`;
 	return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+/** `url(...)` com o SVG de ruído, pronto para `background-image`. */
+export function grainNoiseUrl(c: GrainConfig): string {
+	return noiseUrl(c);
+}
+
+/**
+ * Mesmo ruído como máscara de alpha (`mask-image`): alpha = floor + (1 − floor) × ruído.
+ * Para elementos de cor saturada, onde o overlay do grão quase não aparece.
+ */
+export function grainMaskUrl(c: GrainConfig, floor: number): string {
+	return noiseUrl(c, `<feColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ${1 - floor} 0 0 0 ${floor}'/>`);
 }
 
 /** Estilos inline do container `#grain` para uma config (a textura desce por CSS var). */

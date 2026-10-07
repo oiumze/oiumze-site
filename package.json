@@ -18,6 +18,7 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@tabler/icons": "^3.49.0",
     "daisyui": "^5.7.9"
   }
 }

@@ -1,15 +1,39 @@
 ---
+import Contorno from '../assets/umze-contorno.svg';
+import Button from './Button.astro';
+
 interface Props {
 	id?: string;
 	title?: string;
 }
 
 const { id = 'inicio', title = 'Início' } = Astro.props;
+
+// Coordenadas em px da foto (1440×968) — a foto e o SVG escalam juntos (object-cover / slice).
+const FOTO = { w: 1440, h: 968 };
+const CONTORNO = { x: 440, y: 52, w: 433 };
+const ESCALAS = [1, 1.1, 1.2];
+
+// Botões no desktop: partindo do centro do contorno menor, a distância de meia largura do maior + folga de tela
+// (20px no Ouvir, 40px no Assistir);
+// Ouvir termina nesse ponto à esquerda, Assistir começa nele à direita. Valores relativos ao centro da foto.
+const centro = CONTORNO.x + CONTORNO.w / 2 - FOTO.w / 2;
+const meia = (CONTORNO.w * Math.max(...ESCALAS)) / 2;
+// --s = px de tela por px da foto (mesma conta do object-cover: maior escala entre largura e altura).
+// Largura = 100cqw da seção (@container); altura = caixa da foto = seção (100svh − menu de 3.5rem) + 72px.
+const ctaStyle = [
+	`--s: max(100cqw / ${FOTO.w}, (100svh - 3.5rem + 72px) / ${FOTO.h})`,
+	`--cta-ouvir: calc(50cqw - var(--s) * ${centro - meia} + 20px)`,
+	`--cta-assistir: calc(50cqw + var(--s) * ${centro + meia} + 40px)`,
+].join('; ');
 ---
 
 <!-- título só via aria-label -->
-<section id={id} aria-label={title} class="relative isolate min-h-section scroll-mt-14 overflow-hidden">
-	<!-- imagem de fundo: <img> com srcset (1x/2x) em vez de background-image para o navegador escolher a densidade e priorizar o carregamento (LCP) -->
+<section id={id} aria-label={title} data-hero class="@container relative isolate min-h-section scroll-mt-14 overflow-hidden">
+	<!-- sem a classe "hero": é um componente do daisyUI (grid centralizado) e encolhia o bloco dos botões; estilos usam [data-hero] -->
+	<!-- imagem de fundo: <img> com srcset (1x/2x) em vez de background-image para o navegador escolher a densidade e priorizar o carregamento (LCP).
+	     Começa 72px acima da seção (overflow-hidden esconde): o enquadramento parte de 72px do topo da foto, sem vão embaixo
+	     No layout empilhado (mobile, ver .hero-media) a foto e o SVG ficam 120px mais largos que a tela, para a direita: o centro do corte anda 60px, foto e contorno vão 60px para a direita -->
 	<img
 		src="/images/hero-01.png"
 		srcset="/images/hero-01.png 1x, /images/hero-01@2x.png 2x"
@@ -18,6 +42,153 @@ const { id = 'inicio', title = 'Início' } = Astro.props;
 		alt=""
 		fetchpriority="high"
 		decoding="async"
-		class="absolute inset-0 -z-10 size-full object-cover"
+		class="absolute inset-x-0 -top-18 -z-10 hero-media h-[calc(100%+72px)] max-w-none object-cover object-top"
 	/>
+	<!-- degradê discreto sobre a foto (abaixo do contorno): transparente até 70% da altura, preto só no fim -->
+	<div class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-b from-transparent from-70% to-black"></div>
+	<!-- contorno por cima da foto: mesma caixa da <img> e viewBox com as dimensões da foto; "xMidYMin slice" = object-cover + object-top,
+	     então o contorno acompanha a foto em qualquer viewport. x/y = posição do contorno nas coordenadas da foto (1440×968)
+	     data-grain-mask: o grão também entra como máscara nas linhas (overlay quase não aparece no amarelo), ver Grain.astro -->
+	<svg
+		id="hero-contorno"
+		data-grain-mask="0.5"
+		viewBox={`0 0 ${FOTO.w} ${FOTO.h}`}
+		preserveAspectRatio="xMidYMin slice"
+		aria-hidden="true"
+		class="pointer-events-none absolute inset-x-0 -top-18 -z-10 hero-media h-[calc(100%+72px)]"
+	>
+		<!-- camadas do parallax: cópias do contorno abertas na horizontal a partir do pico da cabeça (201,0 no SVG do contorno; transform-box: fill-box).
+		     non-scaling-stroke mantém o traço com a mesma espessura nas cópias.
+		     O <g> de fora desloca a camada seguindo --px/--py (-1…1, setados pelo script); quanto mais externa, mais anda (unidades da foto) -->
+		{ESCALAS.map((scale, i) => (
+			<g style={`translate: calc(var(--px, 0) * ${(i + 1) * 12}px) calc(var(--py, 0) * ${(i + 1) * 8}px)`}>
+				<g class="[transform-box:fill-box] [&_path]:[vector-effect:non-scaling-stroke]" style={`transform-origin: 201px 0; scale: ${scale} 1`}>
+					<Contorno x={CONTORNO.x} y={CONTORNO.y} />
+				</g>
+			</g>
+		))}
+	</svg>
+	<!-- chamadas. Mobile: empilhadas no centro da imagem, menores e com fundo preto a 15% (ver <style>). Desktop: a 97px da base, posicionadas pelo contorno (ver ctaStyle);
+	     se algum botão sair da tela, o script põe data-stack na seção e ela volta para o layout mobile (botões e foto).
+	     data-grain-mask: grão como máscara nos botões (branco/amarelo claro não pegam o overlay), ver Grain.astro -->
+	<div id="hero-ctas" data-grain-mask="0.85" class="ctas flex min-h-section flex-col items-center justify-center gap-4 px-6" style={ctaStyle}>
+		<Button href="#" label="Ouvir" class="cta-ouvir" />
+		<Button href="#" label="Assistir" class="cta-assistir" />
+	</div>
+	<!-- ir para a próxima seção (rolagem suave vem do motion-safe:scroll-smooth no <html>) -->
+	<a
+		href="#sobre"
+		aria-label="Ir para a próxima seção"
+		class="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center text-yellow-light transition-opacity hover:opacity-70"
+	>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-7">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+			<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+		</svg>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-5">
+			<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
+		</svg>
+	</a>
 </section>
+
+<style>
+	/* Dois layouts, trocados juntos: empilhado (padrão; foto e contorno 60px para a direita, botões menores
+	   com fundo preto a 15%) e desktop (≥ 48rem e sem data-stack; foto centralizada, botões posicionados pelo contorno). */
+	/* botões no layout empilhado: < 48rem ou data-stack (o hover/toque é a faixa do RollButton, por cima do fundo) */
+	@media (width < 48rem) {
+		.ctas > :global(a) {
+			font-size: 1.5rem;
+			background-color: rgb(0 0 0 / 0.15);
+		}
+	}
+	[data-hero][data-stack] .ctas > :global(a) {
+		font-size: 1.5rem;
+		background-color: rgb(0 0 0 / 0.15);
+	}
+	.hero-media {
+		width: calc(100% + 120px);
+	}
+	@media (width >= 48rem) {
+		[data-hero]:not([data-stack]) .hero-media {
+			width: 100%;
+		}
+		[data-hero]:not([data-stack]) .ctas {
+			display: block;
+			padding: 0;
+		}
+		[data-hero]:not([data-stack]) .ctas > :global(.cta-ouvir),
+		[data-hero]:not([data-stack]) .ctas > :global(.cta-assistir) {
+			position: absolute;
+			bottom: 97px;
+		}
+		[data-hero]:not([data-stack]) .ctas > :global(.cta-ouvir) {
+			right: var(--cta-ouvir);
+		}
+		[data-hero]:not([data-stack]) .ctas > :global(.cta-assistir) {
+			left: var(--cta-assistir);
+		}
+	}
+</style>
+
+<script>
+	// Layout desktop: tira data-stack da seção, mede e, se algum botão passar da margem lateral (24px), empilha
+	// (layout mobile: botões e foto). Depende de largura, altura (escala da foto) e da fonte, então mede no resize
+	// e quando as fontes carregam.
+	const hero = document.querySelector<HTMLElement>('[data-hero]');
+	const ctas = document.getElementById('hero-ctas');
+	const MARGEM = 24;
+	function fitCtas() {
+		if (!hero || !ctas) return;
+		hero.removeAttribute('data-stack');
+		const box = hero.getBoundingClientRect();
+		// só os links: o <script> do RollButton também é renderizado aqui dentro (caixa vazia em 0,0)
+		const cortado = [...ctas.querySelectorAll(':scope > a')].some((el) => {
+			const r = el.getBoundingClientRect();
+			return r.left < box.left + MARGEM || r.right > box.right - MARGEM;
+		});
+		hero.toggleAttribute('data-stack', cortado);
+	}
+	if (hero) new ResizeObserver(fitCtas).observe(hero, { box: 'border-box' });
+	document.fonts.ready.then(fitCtas);
+</script>
+
+<script>
+	import { onTilt } from '../lib/tilt';
+
+	const layers = document.getElementById('hero-contorno');
+	const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+	// alvo (-1…1) vindo do mouse/giroscópio; o valor atual persegue o alvo com easing
+	const target = { x: 0, y: 0 };
+	const current = { x: 0, y: 0 };
+	let running = false;
+
+	function frame() {
+		current.x += (target.x - current.x) * 0.08;
+		current.y += (target.y - current.y) * 0.08;
+		layers?.style.setProperty('--px', current.x.toFixed(4));
+		layers?.style.setProperty('--py', current.y.toFixed(4));
+		running = Math.abs(target.x - current.x) > 0.001 || Math.abs(target.y - current.y) > 0.001;
+		if (running) requestAnimationFrame(frame);
+	}
+
+	function move(x: number, y: number) {
+		if (reduced.matches) return;
+		target.x = Math.max(-1, Math.min(1, x));
+		target.y = Math.max(-1, Math.min(1, y));
+		if (!running) {
+			running = true;
+			requestAnimationFrame(frame);
+		}
+	}
+
+	// Desktop: posição do mouse relativa ao centro da janela.
+	addEventListener('pointermove', (e) => {
+		if (e.pointerType !== 'mouse') return;
+		move((e.clientX / innerWidth) * 2 - 1, (e.clientY / innerHeight) * 2 - 1);
+	});
+	document.documentElement.addEventListener('mouseleave', () => move(0, 0));
+
+	// Mobile: as camadas vão para o mesmo lado que o celular inclina (ver src/lib/tilt.ts).
+	onTilt(move);
+</script>

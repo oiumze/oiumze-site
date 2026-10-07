@@ -13,7 +13,9 @@ const linkClass = 'hover:underline underline-offset-4 aria-[current=location]:te
 <header class="drawer drawer-end" data-scrollspy>
   <input id="menu-drawer" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content">
-    <div class="fixed inset-x-0 top-0 z-10 bg-black text-yellow-light shadow-sm px-6 lg:px-12">
+    <!-- borda vermelha de 2px embaixo (box-shadow sem desfoque: não muda os 56px de altura), só depois do Hero (data-past-hero, ver script):
+         separa o menu da seção Sobre, ambos pretos -->
+    <div id="menu-bar" class="fixed inset-x-0 top-0 z-10 bg-black text-yellow-light px-6 transition-shadow duration-300 data-past-hero:shadow-[0_2px_0_var(--color-red)] lg:px-12">
       <div class="navbar min-h-14 mx-auto max-w-[1200px] px-0">
         <div class="navbar-start w-auto">
           <h1 class="sr-only">Umzé</h1>
@@ -81,6 +83,17 @@ const linkClass = 'hover:underline underline-offset-4 aria-[current=location]:te
     { rootMargin: '-50% 0px -50% 0px' },
   );
   sections.forEach((section) => observer.observe(section));
+
+  // Borda do menu só depois que o Hero (#inicio) sai de baixo dele. rootMargin tira os 56px do menu + 4px de folga:
+  // ao clicar em "Sobre" a rolagem para com o Hero encostado exatamente no menu, e borda encostada conta como
+  // interseção para o IntersectionObserver.
+  const bar = document.getElementById('menu-bar');
+  const hero = document.getElementById('inicio');
+  if (bar && hero) {
+    new IntersectionObserver(([e]) => bar.toggleAttribute('data-past-hero', !e.isIntersecting), {
+      rootMargin: '-60px 0px 0px 0px',
+    }).observe(hero);
+  }
 
   // Fecha a sidebar mobile ao clicar num link
   const drawerToggle = document.querySelector<HTMLInputElement>('#menu-drawer');
