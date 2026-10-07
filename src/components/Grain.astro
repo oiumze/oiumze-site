@@ -16,6 +16,7 @@ import { grainDefaults, grainStyle } from '../lib/grain';
 	id="grain"
 	aria-hidden="true"
 	data-fps={grainDefaults.fps}
+	data-fps-touch={grainDefaults.fpsTouch}
 	class="grain pointer-events-none fixed inset-0 z-[9999] overflow-hidden"
 	style={grainStyle(grainDefaults)}
 >
@@ -46,16 +47,46 @@ import { grainDefaults, grainStyle } from '../lib/grain';
 </style>
 
 <script>
+	import { grainDefaults, grainMaskUrl, grainNoiseUrl } from '../lib/grain';
+
 	const grain = document.getElementById('grain');
 	const noise = grain?.querySelector<HTMLElement>('.grain-noise');
 	const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
+	// O SVG é rasterizado na resolução física: em telas 2x/3x (celular) o grão sairia 2–3× menor e
+	// sumiria. Dividir a frequência por √devicePixelRatio aumenta o grão só o bastante para aparecer:
+	// dividir pelo dpr inteiro deixa o grão do tamanho da tela 1x, grosso e com cara de baixa resolução.
+	const dpr = Math.max(1, devicePixelRatio);
+	const config = { ...grainDefaults, baseFrequency: grainDefaults.baseFrequency / Math.sqrt(dpr) };
+	if (grain && dpr > 1) grain.style.setProperty('--grain-noise', grainNoiseUrl(config));
+
+	// Elementos com [data-grain-mask] (ex.: contornos amarelos do Hero): o overlay do grão quase não
+	// altera cores saturadas, então o grão entra também como máscara de alpha no próprio elemento,
+	// saltando junto com a textura. O valor do atributo é o alpha mínimo (padrão 0.5).
+	const masked = [...document.querySelectorAll<HTMLElement | SVGElement>('[data-grain-mask]')];
+	// só move a máscara de quem está na tela: mexer em mask-position redesenha o elemento
+	const maskVisible = new Set<Element>();
+	const maskObserver = new IntersectionObserver((entries) => {
+		for (const e of entries) e.isIntersecting ? maskVisible.add(e.target) : maskVisible.delete(e.target);
+	});
+	for (const el of masked) {
+		maskObserver.observe(el);
+		const url = grainMaskUrl(config, Number(el.dataset.grainMask) || 0.5);
+		for (const prefix of ['', '-webkit-']) {
+			el.style.setProperty(`${prefix}mask-image`, url);
+			el.style.setProperty(`${prefix}mask-size`, `${config.tile}px`);
+		}
+	}
+
 	// Saltos aleatórios: a cada quadro a textura vai para um offset qualquer dentro de
 	// um tile, então o padrão nunca se repete.
+	// Telas de toque (celular) saltam menos por segundo: o grão cobre a página com mix-blend-mode, e cada
+	// salto obriga a GPU a recompor a tela inteira.
+	const touch = matchMedia('(pointer: coarse)');
 	let last = 0;
 	function frame(now: number) {
 		requestAnimationFrame(frame);
-		const fps = Number(grain?.dataset.fps);
+		const fps = Number(touch.matches ? grain?.dataset.fpsTouch : grain?.dataset.fps);
 		// -2ms de folga: sem ela, o jitter do rAF (16.6 vs 16.7ms) derruba 60fps para 30
 		if (!grain || !noise || reduced.matches || !fps || now - last < 1000 / fps - 2) return;
 		last = now;
@@ -63,6 +94,10 @@ import { grainDefaults, grainStyle } from '../lib/grain';
 		const x = Math.round(Math.random() * tile);
 		const y = Math.round(Math.random() * tile);
 		noise.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+		for (const el of maskVisible as Set<HTMLElement | SVGElement>) {
+			el.style.setProperty('mask-position', `${x}px ${y}px`);
+			el.style.setProperty('-webkit-mask-position', `${x}px ${y}px`);
+		}
 	}
 	requestAnimationFrame(frame);
 

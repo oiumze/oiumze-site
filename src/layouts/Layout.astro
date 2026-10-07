@@ -13,7 +13,7 @@ import '../styles/app.css'
 		<link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
 		<link rel="shortcut icon" href="/favicon/favicon.ico" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
-		<meta name="apple-mobile-web-app-title" content="Umzé" />
+		<meta name="apple-mobile-web-app-title" content="UMZÉ" />
 		<link rel="manifest" href="/favicon/site.webmanifest" />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,9 +22,9 @@ import '../styles/app.css'
 			href="https://fonts.googleapis.com/css2?family=Reddit+Sans:ital,wght@0,200..900;1,200..900&family=Righteous&display=swap"
 			rel="stylesheet"
 		/>
-		<title>Umzé</title>
-		<meta property="og:title" content="Umzé" />
-		<meta property="og:site_name" content="Umzé" />
+		<title>UMZÉ</title>
+		<meta property="og:title" content="UMZÉ" />
+		<meta property="og:site_name" content="UMZÉ" />
 		<meta property="og:type" content="website" />
 		<meta property="og:locale" content="pt_BR" />
 	</head>
@@ -37,6 +37,48 @@ import '../styles/app.css'
 		<Grain />
 	</body>
 </html>
+
+<script>
+	// Rolagem suave mais lenta que a do navegador (scroll-behavior: smooth não tem controle de duração) para links
+	// de âncora da própria página (#id ou /#id). Respeita scroll-margin-top da seção e prefers-reduced-motion
+	// (aí fica o pulo direto). Rolar com a roda/dedo durante a animação cancela.
+	const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+	const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2); // easeInOutCubic
+	let anim = 0;
+
+	function scrollToEl(el: HTMLElement) {
+		const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+		const start = scrollY;
+		const end = Math.min(el.getBoundingClientRect().top + scrollY - margin, document.documentElement.scrollHeight - innerHeight);
+		const dist = end - start;
+		// ~0.9s para distâncias curtas até 1.8s para longas
+		const duration = Math.min(1800, Math.max(900, 600 + Math.abs(dist) * 0.5));
+		const t0 = performance.now();
+		cancelAnimationFrame(anim);
+		const step = (now: number) => {
+			const t = Math.min(1, (now - t0) / duration);
+			scrollTo({ top: start + dist * ease(t), behavior: 'instant' });
+			if (t < 1) anim = requestAnimationFrame(step);
+		};
+		anim = requestAnimationFrame(step);
+	}
+
+	// (o listener de touchstart também faz o :active funcionar no iOS, que só aplica :active com algum listener de toque)
+	for (const ev of ['wheel', 'touchstart', 'keydown'] as const) {
+		addEventListener(ev, () => cancelAnimationFrame(anim), { passive: true });
+	}
+
+	document.addEventListener('click', (e) => {
+		if (reduced.matches || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+		const a = (e.target as Element).closest('a');
+		if (!a || a.hash.length < 2 || a.pathname !== location.pathname || a.origin !== location.origin) return;
+		const el = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+		if (!el) return;
+		e.preventDefault();
+		history.pushState(null, '', a.hash);
+		scrollToEl(el);
+	});
+</script>
 
 <style>
 	html,

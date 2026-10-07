@@ -1,0 +1,135 @@
+---
+// Botão preenchido com hover "roll": uma faixa sobe por dentro do botão trocando o fundo (hoverBg) e as
+// letras rolam para cima em cascata, trocando pela versão na cor hoverFg (sem hoverBg/hoverFg, inverte as cores).
+// Ao sair, a faixa continua subindo e some pelo topo (atravessa o botão em vez de voltar).
+// Toque: a animação toca inteira num toque curto (data-tap, ver script), não só enquanto o dedo segura.
+// Só transform/opacity: barato para a GPU mesmo com o grão por cima.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'a'> {
+	label: string;
+	/** cor de fundo */
+	bg: string;
+	/** cor do texto */
+	fg: string;
+	/** fundo no hover (padrão: fg) */
+	hoverBg?: string;
+	/** texto no hover (padrão: bg) */
+	hoverFg?: string;
+}
+
+const { label, bg, fg, hoverBg = fg, hoverFg = bg, class: className, style, ...attrs } = Astro.props;
+// espaço vira nbsp: inline-block colapsaria o espaço normal
+const chars = [...label].map((ch) => (ch === ' ' ? ' ' : ch));
+---
+
+<a class:list={['roll-btn', className]} style={[`--roll-bg: ${bg}; --roll-fg: ${fg}; --roll-hover-bg: ${hoverBg}; --roll-hover-fg: ${hoverFg}`, style].filter(Boolean).join('; ')} {...attrs}>
+	<span class="roll-fill" aria-hidden="true"></span>
+	<span class="roll-text" aria-hidden="true">
+		{chars.map((ch, i) => (
+			<span class="roll-char" style={`--i: ${i}`}>
+				<span>{ch}</span>
+				<span>{ch}</span>
+			</span>
+		))}
+	</span>
+	<span class="sr-only">{label}</span>
+</a>
+
+<style>
+	.roll-btn {
+		--ease: cubic-bezier(0.65, 0, 0.2, 1);
+		position: relative;
+		isolation: isolate;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		background: var(--roll-bg);
+		color: var(--roll-fg);
+		text-transform: uppercase;
+		line-height: 1;
+		-webkit-tap-highlight-color: transparent;
+		transition: scale 0.3s var(--ease);
+	}
+	.roll-btn:focus-visible {
+		outline: 2px solid var(--roll-fg);
+		outline-offset: 3px;
+	}
+
+	/* faixa: entra crescendo de baixo, sai encolhendo para o topo (a origem troca na saída) */
+	.roll-fill {
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: var(--roll-hover-bg);
+		transform: scaleY(0);
+		transform-origin: top;
+		transition: transform 0.5s var(--ease);
+	}
+
+	.roll-text {
+		display: flex;
+	}
+	/* cada letra é uma janela de 1em com duas cópias empilhadas; o hover sobe a pilha */
+	.roll-char {
+		display: inline-flex;
+		flex-direction: column;
+		height: 1em;
+		overflow: hidden;
+	}
+	.roll-char > span {
+		display: block;
+		transition: transform 0.5s var(--ease);
+		transition-delay: calc(var(--i) * 25ms);
+	}
+	.roll-char > span:last-child {
+		color: var(--roll-hover-fg);
+	}
+
+	/* ativo: hover com mouse, foco por teclado ou toque (data-tap) */
+	@media (hover: hover) {
+		.roll-btn:hover .roll-fill {
+			transform: scaleY(1);
+			transform-origin: bottom;
+		}
+		.roll-btn:hover .roll-char > span {
+			transform: translateY(-100%);
+		}
+	}
+	.roll-btn:focus-visible .roll-fill,
+	.roll-btn[data-tap] .roll-fill {
+		transform: scaleY(1);
+		transform-origin: bottom;
+	}
+	.roll-btn:focus-visible .roll-char > span,
+	.roll-btn[data-tap] .roll-char > span {
+		transform: translateY(-100%);
+	}
+	.roll-btn:active {
+		scale: 0.97;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.roll-fill,
+		.roll-char > span {
+			transition-duration: 0s;
+			transition-delay: 0s;
+		}
+	}
+</style>
+
+<script>
+	// Toque: liga data-tap no pointerdown e mantém o tempo da animação (500ms + cascata), para um toque rápido
+	// mostrar o efeito inteiro; depois desliga e a faixa sai pelo topo.
+	const HOLD = 650;
+	for (const btn of document.querySelectorAll<HTMLElement>('.roll-btn')) {
+		let timer = 0;
+		btn.addEventListener('pointerdown', (e) => {
+			if (e.pointerType === 'mouse') return;
+			clearTimeout(timer);
+			btn.setAttribute('data-tap', '');
+			timer = window.setTimeout(() => btn.removeAttribute('data-tap'), HOLD);
+		});
+	}
+</script>
