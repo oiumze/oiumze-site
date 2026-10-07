@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
+import Sobre from '../components/Sobre.astro';
 
 const sections = [
-	{ id: 'sobre', title: 'Sobre' },
 	{ id: 'meu-som', title: 'Meu Som' },
 	{ id: 'galeria', title: 'Galeria' },
 	{ id: 'imprensa', title: 'Imprensa' },
@@ -12,6 +12,7 @@ const sections = [
 
 <Layout>
 	<Hero />
+	<Sobre />
 	{sections.map(({ id, title }) => (
 		<section id={id} class="min-h-section scroll-mt-14 px-6 py-16 lg:px-12">
 			<h2 class="font-righteous text-4xl uppercase">{title}</h2>

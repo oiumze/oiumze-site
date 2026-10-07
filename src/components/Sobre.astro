@@ -1,0 +1,202 @@
+---
+// Seção Sobre: texto à esquerda; à direita (abaixo no mobile) card com inclinação 3D, redes sociais e
+// botões Press Kit / Merch, todos com a mesma largura da coluna (até 486px; 420px no desktop).
+// A coluna é um container: fontes, paddings e espaços em cqw (frações da largura dela, a partir do layout de
+// 486px), então tudo escala junto ao mudar a largura máxima.
+// Ícones: todos do Tabler (outline), para manter o mesmo traço entre eles.
+import Instagram from '@tabler/icons/outline/brand-instagram.svg';
+import Tiktok from '@tabler/icons/outline/brand-tiktok.svg';
+import Spotify from '@tabler/icons/outline/brand-spotify.svg';
+import X from '@tabler/icons/outline/brand-x.svg';
+import Mail from '@tabler/icons/outline/mail.svg';
+import RollButton from './RollButton.astro';
+
+interface Props {
+	id?: string;
+	title?: string;
+}
+
+const { id = 'sobre', title = 'Sobre' } = Astro.props;
+
+// links ainda não definidos
+const redes = [
+	{ label: 'Instagram', href: '#', Icon: Instagram },
+	{ label: 'TikTok', href: '#', Icon: Tiktok },
+	{ label: 'Spotify', href: '#', Icon: Spotify },
+	{ label: 'X (Twitter)', href: '#', Icon: X },
+	{ label: 'E-mail', href: '#', Icon: Mail },
+];
+
+// medidas do layout (coluna de 486px): botão com 77px de altura, fonte de 40px (RollButton usa line-height 1:
+// a altura vem só da fonte + padding)
+const botao = 'w-full py-[3.81cqw] font-righteous text-[8.22cqw]';
+---
+
+<!-- pt-[54px]: espaço visível menu → título igual ao título → texto (~60px; o texto tem meia entrelinha em cima) -->
+<section id={id} class="min-h-section scroll-mt-14 bg-black px-6 pt-[54px] pb-16 text-yellow-light lg:px-12">
+	<div class="mx-auto grid max-w-[1200px] items-start gap-16 md:grid-cols-[minmax(0,1fr)_minmax(0,420px)] md:gap-12">
+		<div>
+			<!-- bold simulado: Righteous só tem peso 400; contorno na cor do texto engrossa o traço (em em, escala com a fonte)
+			     e um pouco de espaçamento compensa as letras mais grossas -->
+			<h2 class="font-righteous text-4xl tracking-[0.02em] uppercase text-red [-webkit-text-stroke:0.05em_currentColor] md:text-6xl">{title}</h2>
+			<div class="mt-10 max-w-[36rem] space-y-[1lh] text-xl leading-loose md:text-2xl">
+				<p>
+					Através do resgate de sonoridades afrodiaspóricas que embalaram as décadas de 80, UMZÉ propõe uma releitura
+					da cena black através das lentes LGBTQIAPN+.
+				</p>
+				<p>
+					Após sua estreia com CAÇULA (2023), o artista pavimenta o caminho para seu primeiro álbum, NÃO VOU DANÇAR NA
+					SUA PISTA, que aprofunda as intersecções de raça e sexualidade.
+				</p>
+			</div>
+		</div>
+
+		<div class="@container mx-auto w-full max-w-[486px] md:max-w-[420px]">
+			<!-- 18px de espaço em 486px -->
+			<div class="flex flex-col gap-[3.7cqw]">
+				<!-- card com inclinação 3D + reflexo: segue o mouse sobre o card (desktop) ou o giroscópio (mobile), ver script.
+				     Perspectiva menor no mobile: o card é pequeno na tela e a rotação precisa de mais profundidade para aparecer.
+				     Só transform (sem filtro/sombra animados), para não pesar com o grão por cima da página. -->
+				<div id="sobre-card" class="w-full [perspective:40rem] md:[perspective:75rem]">
+					<div
+						class="relative overflow-hidden will-change-transform"
+						style="transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1))"
+					>
+						<img
+							src="/images/about-card.png"
+							srcset="/images/about-card.png 1x, /images/about-card@2x.png 2x, /images/about-card@3x.png 3x"
+							width="486"
+							height="513"
+							alt="Umzé deitado sobre um tapete, falando ao telefone"
+							loading="lazy"
+							decoding="async"
+							class="block h-auto w-full"
+						/>
+						<!-- reflexo de papel fotográfico: ponto de luz (radial) num elemento 2× maior que o card, deslizado em 2D pela
+						     inclinação (--shx/--shy, -1…1): o brilho fica na borda que vem na direção de quem olha, como luz
+						     frontal. Força cresce com a inclinação (--sho). Só transform/opacity. -->
+						<div
+							aria-hidden="true"
+							class="pointer-events-none absolute -inset-1/2 bg-radial from-white/50 via-white/15 via-25% to-transparent to-50%"
+							style="transform: translate(calc(var(--shx, 0) * 22%), calc(var(--shy, 0) * 22%)); opacity: var(--sho, 0)"
+						></div>
+					</div>
+				</div>
+
+				<!-- data-grain-mask: o overlay do grão quase não aparece no amarelo claro/vermelho, então ele entra como
+				     máscara nos ícones e botões (ver Grain.astro) -->
+				<div data-grain-mask="0.85" class="flex flex-col gap-[3.7cqw]">
+					<ul class="grid grid-cols-5 gap-[4.94cqw]"><!-- 24px em 486px -->
+						{redes.map(({ label, href, Icon }) => (
+							<li>
+								<a
+									href={href}
+									aria-label={label}
+									class="flex aspect-square items-center justify-center border-2 border-yellow-light transition-colors hover:bg-yellow-light hover:text-black active:bg-yellow-light active:text-black"
+								>
+									{/* 85%: o desenho do Tabler ocupa 18/24 do ícone, então o traço fica a ~1/6 da borda, como no layout */}
+									<Icon width="85%" height="85%" stroke-width="1.25" aria-hidden="true" />
+								</a>
+							</li>
+						))}
+					</ul>
+
+					<RollButton href="#" label="Press Kit" bg="var(--color-red)" fg="var(--color-yellow-light)" hoverBg="var(--color-white)" hoverFg="var(--color-red)" class={botao} />
+					<RollButton href="#" label="Merch" bg="var(--color-yellow-light)" fg="var(--color-red)" hoverBg="var(--color-white)" hoverFg="var(--color-red)" class={botao} />
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	import { onTilt, onTurn } from '../lib/tilt';
+
+	// Inclinação do card em graus: alvo vindo do mouse sobre o card ou do giroscópio; o valor atual persegue
+	// o alvo com easing num rAF que só roda enquanto há movimento.
+	const card = document.getElementById('sobre-card');
+	const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+	const MAX_MOUSE = 10; // graus no extremo com mouse
+	const target = { rx: 0, ry: 0, s: 1 };
+	const current = { rx: 0, ry: 0, s: 1 };
+	let running = false;
+	let visible = false;
+	// fração do caminho por quadro: mouse responde rápido; giroscópio mais lento, para filtrar o tremor dos sensores
+	const EASE_MOUSE = 0.15;
+	const EASE_GYRO = 0.12;
+	let ease = EASE_MOUSE;
+	// força máxima do reflexo: no celular mais fraco, para não lavar a foto
+	const SHINE_MOUSE = 1;
+	const SHINE_GYRO = 0.35;
+	let shineMax = SHINE_MOUSE;
+
+	function frame() {
+		if (!card) return;
+		current.rx += (target.rx - current.rx) * ease;
+		current.ry += (target.ry - current.ry) * ease;
+		current.s += (target.s - current.s) * ease;
+		card.style.setProperty('--rx', `${current.rx.toFixed(2)}deg`);
+		card.style.setProperty('--ry', `${current.ry.toFixed(2)}deg`);
+		card.style.setProperty('--sc', current.s.toFixed(4));
+		// reflexo na borda que vem na direção de quem olha (12° ≈ extremo): rotateY > 0 afasta a direita → brilho à
+		// esquerda; rotateX > 0 afasta o topo → brilho embaixo. Força cresce com a inclinação.
+		const shx = Math.max(-1, Math.min(1, -current.ry / 12));
+		const shy = Math.max(-1, Math.min(1, current.rx / 12));
+		card.style.setProperty('--shx', shx.toFixed(3));
+		card.style.setProperty('--shy', shy.toFixed(3));
+		card.style.setProperty('--sho', (Math.min(1, Math.hypot(shx, shy) * 1.5) * shineMax).toFixed(3));
+		running = Math.abs(target.rx - current.rx) + Math.abs(target.ry - current.ry) + Math.abs(target.s - current.s) > 0.01;
+		if (running) requestAnimationFrame(frame);
+	}
+
+	function move(rx: number, ry: number, s = 1) {
+		if (reduced.matches) return;
+		target.rx = rx;
+		target.ry = ry;
+		target.s = s;
+		if (!running) {
+			running = true;
+			requestAnimationFrame(frame);
+		}
+	}
+
+	// Desktop: posição do mouse dentro do card; a borda sob o mouse afunda.
+	card?.addEventListener('pointermove', (e) => {
+		if (e.pointerType !== 'mouse') return;
+		const r = card.getBoundingClientRect();
+		const x = ((e.clientX - r.left) / r.width) * 2 - 1;
+		const y = ((e.clientY - r.top) / r.height) * 2 - 1;
+		ease = EASE_MOUSE;
+		shineMax = SHINE_MOUSE;
+		move(-y * MAX_MOUSE, x * MAX_MOUSE, 1.03);
+	});
+	// só mouse: no celular o toque também dispara pointerleave e zeraria a inclinação do giroscópio
+	card?.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && move(0, 0));
+
+	// Mobile (só com o card na tela):
+	// - vertical: inclinação pela gravidade (ver src/lib/tilt.ts), sensibilidade 1.6× até 14.4°;
+	// - horizontal: giro do celular em pé para os lados, como virar uma foto na mão — 0.64× o giro, até 20.8°,
+	//   somado à inclinação lateral pela gravidade.
+	const GYRO_RX = 14.4;
+	const GYRO_RY = 20.8;
+	const TILT_GAIN = 1.6;
+	const TURN_GAIN = 0.64;
+	const clamp = (v: number, m = 1) => Math.max(-m, Math.min(m, v));
+	if (card) new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(card);
+	let tilt = { x: 0, y: 0 };
+	let turn = 0;
+	const gyro = () => {
+		if (!visible) return;
+		ease = EASE_GYRO;
+		shineMax = SHINE_GYRO;
+		move(-clamp(tilt.y * TILT_GAIN) * GYRO_RX, clamp(turn * TURN_GAIN + tilt.x * TILT_GAIN * GYRO_RX, GYRO_RY));
+	};
+	onTilt((x, y) => {
+		tilt = { x, y };
+		gyro();
+	});
+	onTurn((deg) => {
+		turn = deg;
+		gyro();
+	});
+</script>
