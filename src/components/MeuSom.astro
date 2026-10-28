@@ -1,0 +1,201 @@
+---
+// Seção Meu Som: título + texto + cards de lançamentos.
+// Conteúdo vem do CMS: content/sections/my-sound.json (ver src/content.config.ts).
+// Slider Swiper em todas as larguras (arrastar com dedo/mouse/trackpad, impulso e encaixe por card), com um
+// pedaço do próximo card à vista; bordas com blur indicam que há mais cards. Sem JS: rolagem horizontal nativa.
+// Cada card é um container: fontes e espaços em cqw (frações da largura do card, a partir do layout de 390px).
+import { getEntry } from 'astro:content';
+import { link, paragraphs } from '../lib/content';
+import RollButton from './RollButton.astro';
+import Rnb from './Rnb.astro';
+
+interface Props {
+	id?: string;
+}
+
+const { id = 'meu-som' } = Astro.props;
+const { data } = (await getEntry('mySound', 'my-sound'))!;
+
+// botões do card: amarelo claro com texto preto (layout); hover igual aos do Sobre
+const botao = 'px-[2.5cqw] py-[1.8cqw] font-righteous text-[7.4cqw]';
+---
+
+<!-- mesmo respiro do Sobre: pt-[54px] deixa menu → título igual a título → texto -->
+<section id={id} class="min-h-section scroll-mt-14 bg-yellow-light px-6 pt-[54px] pb-16 text-blue-dark lg:px-12">
+	<div class="mx-auto max-w-[1200px]">
+		<h2 class="font-righteous text-4xl tracking-[0.02em] uppercase [-webkit-text-stroke:0.05em_currentColor] md:text-6xl">{data.title}</h2>
+		<div class="mt-6 max-w-[58rem] space-y-[1lh] text-xl leading-loose font-medium md:text-2xl">
+			{paragraphs(data.body).map((p) => <p><Rnb text={p} /></p>)}
+		</div>
+
+		<!-- mobile: sangra até a borda da tela (px-6 da seção), para os vizinhos do card central aparecerem mais -->
+		<div class="relative mt-12 max-md:-mx-6" data-som>
+			<!-- bordas com blur (desktop): aparecem do lado em que ainda há cards (data-more-start/end, ver script) -->
+			<div class="som-edge som-edge-start" aria-hidden="true"></div>
+			<div class="som-edge som-edge-end" aria-hidden="true"></div>
+
+			<div class="som-stage">
+				<ul class="som-list" aria-label="Lançamentos">
+					{data.songs.map((song) => (
+						<li class="som-card @container">
+							<article class="flex h-full flex-col bg-linear-to-b from-blue-dark to-[#0b0c24] px-[5cqw] pt-[4cqw] pb-[5cqw] text-yellow-light">
+								<h3 class="text-center font-righteous text-[8.5cqw] leading-tight [-webkit-text-stroke:0.03em_currentColor]"><Rnb text={song.title} /></h3>
+								<img
+									src={song.cover}
+									alt={`Capa de ${song.title}`}
+									width="345"
+									height="345"
+									loading="lazy"
+									decoding="async"
+									class="mt-[4cqw] aspect-square w-full object-cover"
+								/>
+								<!-- grão como máscara: o overlay quase não aparece no amarelo claro (ver Grain.astro) -->
+								<div data-grain-mask="0.85">
+									<p class="mt-[3cqw] flex gap-[2cqw] font-righteous text-[5.6cqw] leading-none uppercase">
+										<span class="border-2 border-yellow-light px-[1.8cqw] py-[1.4cqw]">{song.type}</span>
+										<span class="border-2 border-yellow-light px-[1.8cqw] py-[1.4cqw]">{song.year}</span>
+									</p>
+									{song.buttons.length > 0 && (
+										<div class="mt-[2cqw] flex flex-wrap gap-[2cqw]">
+											{song.buttons.map((button) => (
+												<RollButton {...link(button.link)} label={button.label} aria-label={`${button.label} ${song.title}`} bg="var(--color-yellow-light)" fg="var(--color-black)" hoverBg="var(--color-white)" hoverFg="var(--color-red)" class={botao} />
+											))}
+										</div>
+									)}
+								</div>
+							</article>
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	/* Slider (Swiper, ver script). Mobile: card com a largura do card do Sobre (largura útil da tela até 486px; a
+	   altura acompanha, tudo dentro do card é em cqw), centralizado com um pedaço dos vizinhos. md+: 2 cards (3 no
+	   lg) e um pedaço do próximo, alinhados à esquerda.
+	   Antes do Swiper iniciar (ou sem JS): rolagem horizontal nativa com snap. */
+	.som-list {
+		display: flex;
+		gap: 0.75rem;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+	}
+	.som-list::-webkit-scrollbar {
+		display: none;
+	}
+	.som-card {
+		/* 100vw − 3rem = largura útil da seção (px-6), como a coluna do Sobre */
+		flex: 0 0 auto;
+		width: min(100vw - 3rem, 486px);
+		scroll-snap-align: center;
+	}
+	@media (width >= 48rem) {
+		.som-list {
+			gap: 2.5rem;
+		}
+		.som-card {
+			width: calc((100% - 1.3 * 2.5rem) / 2.3);
+			scroll-snap-align: start;
+		}
+	}
+	@media (width >= 64rem) {
+		.som-card {
+			width: calc((100% - 2.3 * 2.5rem) / 3.3);
+		}
+	}
+	/* arrastar não seleciona texto nem puxa a imagem (arraste nativo do navegador) */
+	.som-stage {
+		-webkit-user-select: none;
+		user-select: none;
+		-webkit-touch-callout: none;
+	}
+	.som-stage img {
+		-webkit-user-drag: none;
+	}
+	/* Swiper ativo: ele move a lista por transform e define largura/espaço dos cards (no lugar do swiper.css,
+	   que usaria as classes padrão dele) */
+	.som-stage.swiper-initialized {
+		overflow: hidden;
+		touch-action: pan-y;
+	}
+	.swiper-initialized .som-list {
+		gap: 0;
+		overflow: visible;
+		transition-property: transform;
+	}
+	.swiper-initialized .som-card {
+		flex: 0 0 auto;
+	}
+
+	/* blur que vai sumindo para dentro: o card cortado na borda fica desfocado, sinalizando que continua */
+	.som-edge {
+		position: absolute;
+		inset-block: 0;
+		z-index: 1;
+		width: 3rem;
+		pointer-events: none;
+		-webkit-backdrop-filter: blur(6px);
+		backdrop-filter: blur(6px);
+		opacity: 0;
+		transition: opacity 0.3s;
+	}
+	@media (width >= 48rem) {
+		.som-edge {
+			width: 7rem;
+		}
+	}
+	.som-edge-start {
+		left: 0;
+		-webkit-mask-image: linear-gradient(to right, black, transparent);
+		mask-image: linear-gradient(to right, black, transparent);
+	}
+	.som-edge-end {
+		right: 0;
+		-webkit-mask-image: linear-gradient(to left, black, transparent);
+		mask-image: linear-gradient(to left, black, transparent);
+	}
+	[data-som][data-more-start] .som-edge-start,
+	[data-som][data-more-end] .som-edge-end {
+		opacity: 1;
+	}
+</style>
+
+<script>
+	import Swiper from 'swiper';
+	import { A11y, FreeMode, Keyboard, Mousewheel } from 'swiper/modules';
+
+	const som = document.querySelector<HTMLElement>('[data-som]');
+	const stage = som?.querySelector<HTMLElement>('.som-stage');
+
+	// Bordas com blur: do lado em que ainda há cards.
+	function updateEdges(s: Swiper) {
+		som?.toggleAttribute('data-more-start', !s.isLocked && !s.isBeginning);
+		som?.toggleAttribute('data-more-end', !s.isLocked && !s.isEnd);
+	}
+
+	// Arrastar com impulso e assentar no card mais próximo (freeMode sticky), roda/trackpad horizontal, setas do
+	// teclado. Largura dos cards no CSS (slidesPerView auto); espaços iguais ao CSS sem JS. Mobile: card ativo
+	// centralizado, com a ponta dos vizinhos à vista.
+	if (stage) {
+		new Swiper(stage, {
+			modules: [A11y, FreeMode, Keyboard, Mousewheel],
+			// classes próprias: o mesmo markup serve à rolagem nativa sem JS
+			wrapperClass: 'som-list',
+			slideClass: 'som-card',
+			slidesPerView: 'auto',
+			spaceBetween: 12,
+			centeredSlides: true,
+			breakpoints: { 768: { spaceBetween: 40, centeredSlides: false } },
+			grabCursor: true,
+			freeMode: { enabled: true, sticky: true, momentumRatio: 0.6 },
+			mousewheel: { forceToAxis: true },
+			keyboard: { enabled: true, onlyInViewport: true },
+			a11y: { slideLabelMessage: '{{index}} de {{slidesLength}}' },
+			on: { afterInit: updateEdges, progress: updateEdges, lock: updateEdges, unlock: updateEdges },
+		});
+	}
+</script>
