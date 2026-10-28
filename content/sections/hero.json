@@ -1,0 +1,14 @@
+{
+  "image": "/uploads/hero.png",
+  "show_outline": true,
+  "buttons": [
+    {
+      "label": "Ouvir",
+      "link": "#"
+    },
+    {
+      "label": "Assistir",
+      "link": "#"
+    }
+  ]
+}
