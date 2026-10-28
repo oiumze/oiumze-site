@@ -1,0 +1,468 @@
+---
+// Seção Galeria: fotos soltas e arrastáveis, com cara de janelas (barra com nome + minimizar/fechar/ampliar)
+// ou de fotos físicas (sem barra, levemente inclinadas). Quem visita arrasta, sobrepõe (a última tocada vai para
+// cima), minimiza, fecha e amplia (lightbox). Sem JS: as fotos ficam lado a lado, sem arrastar.
+// Conteúdo vem do CMS: content/sections/gallery.json (ver src/content.config.ts).
+import { getEntry } from 'astro:content';
+
+interface Props {
+	id?: string;
+}
+
+const { id = 'galeria' } = Astro.props;
+const { data } = (await getEntry('gallery', 'gallery'))!;
+
+// nome da janela: o do CMS ou o nome do arquivo
+const photos = data.photos.map((photo) => ({ ...photo, caption: photo.caption || photo.image.split('/').pop() || '' }));
+---
+
+<!-- isolate: o z-index das fotos (sobe a cada toque) fica preso na seção, sempre abaixo do menu.
+     overflow-x-clip: cantos de fotos inclinadas/arrastadas até a borda não criam rolagem lateral na página -->
+<section id={id} data-gallery-section class="isolate overflow-x-clip min-h-section scroll-mt-14 bg-linear-to-b from-blue-dark to-[#0b0c24] px-6 pt-[54px] pb-16 text-yellow-light lg:px-12">
+	<div class="mx-auto max-w-[1200px]">
+		<h2 class="font-righteous text-4xl tracking-[0.02em] uppercase [-webkit-text-stroke:0.05em_currentColor] md:text-6xl">{data.title}</h2>
+
+		<!-- área das fotos: com JS vira data-free (posições absolutas espalhadas pelo script) -->
+		<div class="gallery-area mt-10" data-gallery>
+			{photos.map((photo) => (
+				<figure class:list={['gallery-item', photo.window ? 'gallery-window' : 'gallery-photo']} data-gallery-item>
+					{photo.window ? (
+						<div class="gallery-bar" data-gallery-handle tabindex="0" aria-label={`Janela ${photo.caption}: arraste ou use as setas para mover`}>
+							<span class="truncate">{photo.caption}</span>
+							<span class="flex shrink-0 items-center gap-2.5">
+								<button type="button" data-gallery-min aria-expanded="true" aria-label={`Minimizar ${photo.caption}`}>
+									<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1" /><path d="M4.5 11h7" stroke-width="2" /></svg>
+								</button>
+								<button type="button" data-gallery-close aria-label={`Fechar ${photo.caption}`}>
+									<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3 3 13" /></svg>
+								</button>
+								<button type="button" data-gallery-max aria-label={`Ampliar ${photo.caption}`}>
+									<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1" /></svg>
+								</button>
+							</span>
+						</div>
+					) : null}
+					<!-- corpo: grid 1fr → 0fr anima o minimizar sem medir altura -->
+					<div class="gallery-body">
+						<div class="overflow-hidden">
+							<img
+								src={photo.image}
+								alt={photo.alt}
+								data-caption={photo.caption}
+								loading="lazy"
+								decoding="async"
+								draggable="false"
+								{...(photo.window ? {} : { 'data-gallery-handle': '', tabindex: 0 })}
+							/>
+						</div>
+					</div>
+				</figure>
+			))}
+		</div>
+
+		<div class="mt-8 flex justify-center">
+			<button type="button" data-gallery-restore hidden class="border-2 border-yellow-light px-4 py-2 font-righteous text-lg uppercase transition-colors hover:bg-yellow-light hover:text-blue-dark">
+				Reabrir fotos
+			</button>
+		</div>
+	</div>
+
+	<!-- ampliar: lightbox nativo (Esc fecha, foco preso no diálogo) -->
+	<dialog data-gallery-dialog class="gallery-dialog" aria-label="Foto ampliada">
+		<figure class="flex max-h-full flex-col items-center gap-3">
+			<img alt="" class="max-h-[80svh] w-auto max-w-full object-contain" />
+			<figcaption class="text-yellow-light"></figcaption>
+		</figure>
+		<form method="dialog" class="absolute top-4 right-4">
+			<button class="grid size-11 place-items-center text-yellow-light" aria-label="Fechar foto ampliada">
+				<svg viewBox="0 0 16 16" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3 3 13" /></svg>
+			</button>
+		</form>
+	</dialog>
+</section>
+
+<style>
+	/* Sem JS: fotos lado a lado. Larguras em cqw (frações da área). */
+	.gallery-area {
+		container-type: inline-size;
+		position: relative;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 1.5rem;
+	}
+	.gallery-item {
+		width: 64cqw;
+	}
+	.gallery-photo {
+		width: 76cqw;
+	}
+	@container (width >= 40rem) {
+		.gallery-item {
+			width: 26cqw;
+		}
+		.gallery-photo {
+			width: 34cqw;
+		}
+	}
+
+	/* Com JS: posições absolutas (--x/--y em px, ver script); a altura da área vem do layout espalhado. */
+	[data-gallery][data-free] {
+		display: block;
+		height: var(--gallery-h, auto);
+	}
+	[data-gallery][data-free] .gallery-item {
+		position: absolute;
+		top: 0;
+		left: 0;
+		translate: var(--x, 0) var(--y, 0);
+		rotate: var(--r, 0deg);
+	}
+
+	.gallery-item {
+		overflow: hidden;
+		border-radius: 24px;
+		box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+		transition:
+			rotate 0.3s,
+			scale 0.3s,
+			box-shadow 0.3s,
+			opacity 0.25s;
+		/* camada própria fixa: sem ela, o navegador promove a foto a uma camada da GPU ao arrastar e a desfaz no
+		   fim da transição, repintando as fotos de trás (o "piscar" ao soltar) */
+		will-change: translate, rotate, scale;
+		backface-visibility: hidden;
+	}
+	/* pego: cresce um pouco e a sombra afasta, como foto levantada da mesa (a inclinação vem do script) */
+	.gallery-item[data-dragging] {
+		scale: 1.03;
+		box-shadow: 0 24px 50px rgb(0 0 0 / 0.5);
+	}
+	.gallery-item[data-resetting] {
+		transition:
+			translate 0.5s cubic-bezier(0.65, 0, 0.2, 1),
+			rotate 0.5s,
+			scale 0.3s,
+			box-shadow 0.3s,
+			opacity 0.25s;
+	}
+	.gallery-item[data-closing] {
+		scale: 0.9;
+		opacity: 0;
+	}
+
+	.gallery-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.55rem 1.1rem;
+		background: #d9d9d9;
+		color: var(--color-blue-dark);
+		font-size: 0.95rem;
+		cursor: grab;
+		/* a barra é a alça: arrastar nela não rola a página (no resto da foto, rola) */
+		touch-action: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+	.gallery-bar button {
+		display: grid;
+		place-items: center;
+		/* área de toque maior que o ícone */
+		margin: -0.4rem;
+		padding: 0.4rem;
+		cursor: pointer;
+	}
+	.gallery-bar button:hover {
+		opacity: 0.6;
+	}
+	.gallery-bar:focus-visible,
+	.gallery-photo img:focus-visible {
+		outline: 2px solid var(--color-yellow-light);
+		outline-offset: -4px;
+	}
+
+	.gallery-body {
+		display: grid;
+		grid-template-rows: 1fr;
+		transition: grid-template-rows 0.35s;
+	}
+	/* ao reabrir, desminimiza na hora: o layout mede a altura cheia logo em seguida */
+	.gallery-item:is([data-resetting], [data-closing]) .gallery-body {
+		transition: none;
+	}
+	.gallery-item[data-min] .gallery-body {
+		grid-template-rows: 0fr;
+	}
+	.gallery-body img {
+		display: block;
+		width: 100%;
+		height: auto;
+		-webkit-user-drag: none;
+		-webkit-user-select: none;
+		user-select: none;
+		-webkit-touch-callout: none;
+	}
+	/* foto física: a foto inteira é a alça */
+	.gallery-photo img {
+		cursor: grab;
+		touch-action: none;
+	}
+	.gallery-item[data-dragging] :is(.gallery-bar, img) {
+		cursor: grabbing;
+	}
+
+	.gallery-dialog {
+		max-width: 100vw;
+		max-height: 100svh;
+		width: 100vw;
+		height: 100svh;
+		padding: 4rem 1.5rem;
+		background: transparent;
+		place-items: center;
+	}
+	.gallery-dialog[open] {
+		display: grid;
+	}
+	.gallery-dialog::backdrop {
+		background: rgb(0 0 0 / 0.85);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.gallery-item,
+		.gallery-body {
+			transition-duration: 0s;
+		}
+	}
+</style>
+
+<script>
+	// Fotos soltas: espalha em colunas com sobreposição e um pouco de acaso (sempre o mesmo, por índice),
+	// arrasta pela alça (barra da janela ou a foto inteira, se for foto física) e traz para cima a última tocada.
+	const section = document.querySelector<HTMLElement>('[data-gallery-section]');
+	const area = document.querySelector<HTMLElement>('[data-gallery]');
+	const items = [...(area?.querySelectorAll<HTMLElement>('[data-gallery-item]') ?? [])];
+	const restore = document.querySelector<HTMLButtonElement>('[data-gallery-restore]');
+	const dialog = document.querySelector<HTMLDialogElement>('[data-gallery-dialog]');
+
+	// posição de cada foto em px dentro da área
+	const pos = items.map(() => ({ x: 0, y: 0 }));
+	let moved = false; // depois que alguém arrasta, o layout automático não reorganiza mais
+	let width = 0;
+	let top = items.length;
+
+	// acaso determinístico (mulberry32): o mesmo espalhamento a cada visita
+	const rand = (seed: number) => {
+		let t = (seed + 0x6d2b79f5) | 0;
+		t = Math.imul(t ^ (t >>> 15), t | 1);
+		t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+
+	function apply(i: number) {
+		items[i].style.setProperty('--x', `${pos[i].x}px`);
+		items[i].style.setProperty('--y', `${pos[i].y}px`);
+	}
+
+	// limites do arraste: a seção inteira (título e margens incluídos), em coordenadas da área
+	function bounds(i: number) {
+		const a = area!.getBoundingClientRect();
+		const sec = section!.getBoundingClientRect();
+		return {
+			minX: sec.left - a.left,
+			maxX: sec.right - a.left - items[i].offsetWidth,
+			minY: sec.top - a.top,
+			maxY: sec.bottom - a.top - items[i].offsetHeight,
+		};
+	}
+	function clampTo(i: number, x: number, y: number) {
+		const { minX, maxX, minY, maxY } = bounds(i);
+		return { x: Math.max(minX, Math.min(maxX, x)), y: Math.max(minY, Math.min(maxY, y)) };
+	}
+
+	// altura que a área pode ocupar para a seção ter a altura de uma tela, como as demais: tela − menu − o que
+	// vem antes da área na seção − respiro de baixo
+	const JITTER = 40; // px de desvio vertical aleatório
+	function fitHeight() {
+		const above = area!.getBoundingClientRect().top - section!.getBoundingClientRect().top;
+		return innerHeight - 56 - above - parseFloat(getComputedStyle(section!).paddingBottom);
+	}
+
+	// Layout espalhado: colunas (1 no celular, 2 no tablet, 3 no desktop), colunas alternadas descem um pouco e
+	// as linhas se sobrepõem (~30%, ou mais se for preciso para caber na altura de uma tela); cada foto ganha um
+	// desvio aleatório e as fotos físicas uma leve inclinação.
+	function layout() {
+		if (!area) return;
+		width = area.clientWidth;
+		const cols = width < 640 ? 1 : width < 1024 ? 2 : 3;
+		const heights = items.map((el) => el.offsetHeight);
+		const tallest = Math.max(...heights, 1);
+		const rows = Math.ceil(items.length / cols);
+		// passos entre linhas até a última foto (+ a descida das colunas alternadas)
+		const steps = rows - 1 + (cols > 1 && items.length > 1 ? 0.35 : 0);
+		const fit = steps > 0 ? (fitHeight() - tallest - JITTER) / steps : tallest;
+		const rowStep = Math.max(0, Math.min(tallest * 0.7, fit)) | 0;
+		let bottom = 0;
+		items.forEach((el, i) => {
+			const w = el.offsetWidth;
+			const col = i % cols;
+			const row = Math.floor(i / cols);
+			const cell = width / cols;
+			// 1 coluna: alterna esquerda/direita; senão, centro da célula com desvio
+			const x =
+				cols === 1
+					? (i % 2 ? width - w : 0) + (rand(i * 3) - 0.5) * width * 0.08
+					: col * cell + (cell - w) / 2 + (rand(i * 3) - 0.5) * cell * 0.3;
+			const y = row * rowStep + (col % 2) * rowStep * 0.35 + rand(i * 3 + 1) * JITTER;
+			pos[i] = { x: Math.max(0, Math.min(width - w, x)), y };
+			bottom = Math.max(bottom, y + heights[i]);
+			if (el.classList.contains('gallery-photo')) el.style.setProperty('--r', `${((rand(i * 3 + 2) - 0.5) * 8).toFixed(2)}deg`);
+			apply(i);
+		});
+		area.style.setProperty('--gallery-h', `${Math.ceil(bottom)}px`);
+	}
+
+	// mudou a largura: sem arrastes, refaz o layout; com arrastes, mantém as posições e só puxa para dentro
+	function resize() {
+		if (!area || area.clientWidth === width) return;
+		if (!moved) return layout();
+		const ratio = area.clientWidth / width;
+		width = area.clientWidth;
+		items.forEach((_, i) => {
+			pos[i] = clampTo(i, pos[i].x * ratio, pos[i].y);
+			apply(i);
+		});
+	}
+
+	const raise = (el: HTMLElement) => (el.style.zIndex = String(++top));
+	// inclinação: ao arrastar, graus por px/ms de velocidade horizontal (até MAX_SWING); ao soltar, até MAX_REST
+	const SWING = 6;
+	const MAX_SWING = 10;
+	const MAX_REST = 5;
+
+	if (area && section) {
+		area.setAttribute('data-free', '');
+		layout();
+		new ResizeObserver(resize).observe(area);
+		// as alturas só existem com as imagens carregadas
+		for (const img of area.querySelectorAll('img')) img.addEventListener('load', () => !moved && layout(), { once: true });
+	}
+
+	items.forEach((el, i) => {
+		const handle = el.querySelector<HTMLElement>('[data-gallery-handle]');
+		if (!handle) return;
+		let drag: { id: number; px: number; py: number; x: number; y: number; lx: number; lt: number } | null = null;
+		let still = 0;
+		const tilt = (deg: number) => el.style.setProperty('--r', `${deg.toFixed(2)}deg`);
+
+		handle.addEventListener('pointerdown', (e) => {
+			if (e.button !== 0 || (e.target as Element).closest('button')) return;
+			e.preventDefault();
+			raise(el);
+			handle.setPointerCapture(e.pointerId);
+			drag = { id: e.pointerId, px: e.clientX, py: e.clientY, ...pos[i], lx: e.clientX, lt: e.timeStamp };
+			el.setAttribute('data-dragging', '');
+			tilt(0);
+		});
+		handle.addEventListener('pointermove', (e) => {
+			if (!drag || e.pointerId !== drag.id) return;
+			pos[i] = clampTo(i, drag.x + e.clientX - drag.px, drag.y + e.clientY - drag.py);
+			moved = true;
+			apply(i);
+			// balança na direção do movimento, como foto segura por cima (a transição do rotate suaviza);
+			// parada na mão, volta reta
+			const dt = e.timeStamp - drag.lt;
+			if (dt > 0) tilt(Math.max(-MAX_SWING, Math.min(MAX_SWING, ((e.clientX - drag.lx) / dt) * SWING)));
+			drag.lx = e.clientX;
+			drag.lt = e.timeStamp;
+			clearTimeout(still);
+			still = window.setTimeout(() => drag && tilt(0), 120);
+		});
+		const drop = (e: PointerEvent) => {
+			if (!drag || e.pointerId !== drag.id) return;
+			drag = null;
+			clearTimeout(still);
+			el.removeAttribute('data-dragging');
+			// solta: assenta com uma leve inclinação aleatória, para um lado ou outro (nunca quase reta)
+			const side = Math.random() < 0.5 ? -1 : 1;
+			tilt(side * (1.5 + Math.random() * (MAX_REST - 1.5)));
+		};
+		handle.addEventListener('pointerup', drop);
+		handle.addEventListener('pointercancel', drop);
+
+		// teclado: setas movem (Shift = passo maior), Enter amplia
+		handle.addEventListener('focus', () => raise(el));
+		handle.addEventListener('keydown', (e) => {
+			const step = e.shiftKey ? 64 : 16;
+			const delta = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+			if (e.key === 'Enter' && e.target === handle) return openPhoto(el);
+			if (!delta) return;
+			e.preventDefault();
+			pos[i] = clampTo(i, pos[i].x + delta[0], pos[i].y + delta[1]);
+			moved = true;
+			apply(i);
+		});
+
+		el.querySelector('img')?.addEventListener('dblclick', () => openPhoto(el));
+		el.querySelector('[data-gallery-max]')?.addEventListener('click', () => openPhoto(el));
+
+		const min = el.querySelector<HTMLButtonElement>('[data-gallery-min]');
+		min?.addEventListener('click', () => {
+			const minimized = el.toggleAttribute('data-min');
+			min.setAttribute('aria-expanded', String(!minimized));
+			min.setAttribute('aria-label', `${minimized ? 'Restaurar' : 'Minimizar'} ${el.querySelector('img')?.dataset.caption}`);
+		});
+
+		el.querySelector('[data-gallery-close]')?.addEventListener('click', () => {
+			el.setAttribute('data-closing', '');
+			const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+			setTimeout(() => {
+				el.hidden = true;
+				el.removeAttribute('data-closing');
+				if (restore) restore.hidden = false;
+				// sem rolar a página até o botão
+				restore?.focus({ preventScroll: true });
+			}, reduced ? 0 : 250);
+		});
+	});
+
+	// Reabrir: tudo volta ao começo — fotos abertas, nada minimizado, posições/inclinações e ordem originais.
+	// As que estavam na tela deslizam de volta (data-resetting liga a transição do translate só nessa hora).
+	restore?.addEventListener('click', () => {
+		top = items.length;
+		items.forEach((el) => {
+			const wasHidden = el.hidden;
+			el.style.removeProperty('z-index');
+			el.style.removeProperty('--r');
+			el.removeAttribute('data-min');
+			const min = el.querySelector<HTMLButtonElement>('[data-gallery-min]');
+			min?.setAttribute('aria-expanded', 'true');
+			min?.setAttribute('aria-label', `Minimizar ${el.querySelector('img')?.dataset.caption}`);
+			el.setAttribute(wasHidden ? 'data-closing' : 'data-resetting', '');
+			el.hidden = false;
+		});
+		moved = false;
+		layout();
+		requestAnimationFrame(() =>
+			requestAnimationFrame(() => {
+				for (const el of items) el.removeAttribute('data-closing');
+			}),
+		);
+		setTimeout(() => items.forEach((el) => el.removeAttribute('data-resetting')), 500);
+		restore.hidden = true;
+	});
+
+	function openPhoto(el: HTMLElement) {
+		const src = el.querySelector('img');
+		const img = dialog?.querySelector('img');
+		const caption = dialog?.querySelector('figcaption');
+		if (!dialog || !src || !img || !caption) return;
+		img.src = src.currentSrc || src.src;
+		img.alt = src.alt;
+		caption.textContent = src.dataset.caption ?? '';
+		dialog.showModal();
+	}
+	// clique fora da foto (no fundo do diálogo) fecha
+	dialog?.addEventListener('click', (e) => e.target === dialog && dialog.close());
+</script>

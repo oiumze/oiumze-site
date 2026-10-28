@@ -2,20 +2,15 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Sobre from '../components/Sobre.astro';
-
-const sections = [
-	{ id: 'meu-som', title: 'Meu Som' },
-	{ id: 'galeria', title: 'Galeria' },
-	{ id: 'imprensa', title: 'Imprensa' },
-];
+import MeuSom from '../components/MeuSom.astro';
+import Gallery from '../components/Gallery.astro';
+import Press from '../components/Press.astro';
 ---
 
 <Layout>
 	<Hero />
 	<Sobre />
-	{sections.map(({ id, title }) => (
-		<section id={id} class="min-h-section scroll-mt-14 px-6 py-16 lg:px-12">
-			<h2 class="font-righteous text-4xl uppercase">{title}</h2>
-		</section>
-	))}
+	<MeuSom />
+	<Gallery />
+	<Press />
 </Layout>

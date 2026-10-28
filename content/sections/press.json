@@ -1,0 +1,78 @@
+{
+  "title": "UMZÉ\nNA IMPRENSA",
+  "body": "Inspirado pela MPB da minha mãe, e pelas rodas de samba e bailes blacks do meu pai, meu som varre diversos gêneros musicais :)",
+  "news": [
+    {
+      "outlet": "GRAMOFONE ATIVO",
+      "title": "UMZÉ BUSCA ABRAÇAR O MUNDO SEM MEDO EM SEU EP ‘CAÇULA’",
+      "image": "/uploads/imprensa/gramofone-ativo.png",
+      "button": {
+        "label": "Veja a Entrevista",
+        "link": "https://gramofoneativo.com/umze-busca-abracar-o-mundo-sem-medo-em-seu-ep-cacula/"
+      }
+    },
+    {
+      "outlet": "RTN TV",
+      "title": "LANÇAMENTO SINGLE: QUERO VIVER EM TV ABERTA",
+      "image": "/uploads/imprensa/rtn-tv.png",
+      "button": {
+        "label": "Assista a Matéria",
+        "link": "https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQ4MjY4ODQ5NTc1MDM0?story_media_id=3252071993042235164_8229571879&igsh=dzJ1OWNlNGswdXI1"
+      }
+    },
+    {
+      "outlet": "DESALINHO",
+      "title": "A casa d'O Cientista Perdido e UMZÉ. Lançamento casa, aqui",
+      "image": "/uploads/imprensa/desalinho.png",
+      "button": {
+        "label": "Veja a Entrevista",
+        "link": "https://www.desalinho.com/post/o-cientista-perdido-umz%C3%A9"
+      }
+    },
+    {
+      "outlet": "PRETESSÊNCIAS",
+      "title": "UMZÉ une Lio (Tuyo) e a herança dos Bailes Charme em manifesto RnB",
+      "image": "/uploads/imprensa/pretessencias.png",
+      "button": {
+        "label": "Leia a Matéria",
+        "link": "https://www.pretessencias.com.br/musica/umze-une-lio-tuyo-e-a-heranca-dos-bailes-charme-em-manifesto-rb/"
+      }
+    },
+    {
+      "outlet": "MINUTO INDIE",
+      "title": "UMZÉ transforma recusa em linguagem e reposiciona o corpo queer na história dos bailes black",
+      "image": "/uploads/imprensa/minuto-indie.png",
+      "button": {
+        "label": "Leia a Matéria",
+        "link": "https://minutoindie.com/umze-transforma-recusa-em-linguagem-e-reposiciona-o-corpo-queer-na-historia-dos-bailes-black/"
+      }
+    },
+    {
+      "outlet": "ZONA SUBURBANA",
+      "title": "UMZÉ lança EP e amplia debate sobre representatividade queer no RnB brasileiro",
+      "image": "/uploads/imprensa/zona-suburbana.png",
+      "button": {
+        "label": "Leia a Matéria",
+        "link": "https://www.zonasuburbana.com.br/umze-lanca-ep-nao-vou-dancar-na-sua-pista-lado-a-e-amplia-debate-sobre-representatividade-queer-no-rb-brasileiro/"
+      }
+    },
+    {
+      "outlet": "POP FANTASMA",
+      "title": "Radar: Giovani Cidreira, City Mall, Kassel, UMZÉ e Lio, OVM, Ana Cacimba",
+      "image": "/uploads/imprensa/pop-fantasma.png",
+      "button": {
+        "label": "Leia a Matéria",
+        "link": "https://popfantasma.com.br/radar-giovani-cidreira-city-mall-kassel-umze-e-lio-ovm-ana-cacimba/"
+      }
+    },
+    {
+      "outlet": "HOMINIS CANIDAE",
+      "title": "UMZÉ: NÃO VOU DANÇAR NA SUA PISTA (LADO A)",
+      "image": "/uploads/imprensa/hominis-canidae.png",
+      "button": {
+        "label": "Leia a Matéria",
+        "link": "https://popfantasma.com.br/radar-giovani-cidreira-city-mall-kassel-umze-e-lio-ovm-ana-cacimba/"
+      }
+    }
+  ]
+}

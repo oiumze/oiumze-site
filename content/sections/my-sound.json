@@ -1,0 +1,82 @@
+{
+  "title": "Meu Som",
+  "body": "Inspirado pela MPB da minha mãe, e pelas rodas de samba e bailes blacks do meu pai, meu som varre diversos gêneros musicais :)",
+  "songs": [
+    {
+      "title": "Caçula",
+      "type": "EP",
+      "year": 2023,
+      "cover": "/uploads/cacula.png",
+      "buttons": [
+        {
+          "label": "Ouvir",
+          "link": "#"
+        },
+        {
+          "label": "Assistir",
+          "link": "#"
+        }
+      ]
+    },
+    {
+      "title": "casa, aqui",
+      "type": "EP",
+      "year": 2024,
+      "cover": "/uploads/casa-aqui.png",
+      "buttons": [
+        {
+          "label": "Ouvir",
+          "link": "#"
+        },
+        {
+          "label": "Assistir",
+          "link": "#"
+        }
+      ]
+    },
+    {
+      "title": "CORRIIDA",
+      "type": "Single",
+      "year": 2025,
+      "cover": "/uploads/corrida.png",
+      "buttons": [
+        {
+          "label": "Ouvir",
+          "link": "#"
+        }
+      ]
+    },
+    {
+      "title": "NVDNSP (Lado A)",
+      "type": "EP",
+      "year": 2026,
+      "cover": "/uploads/nvdnsp-lado-a.png",
+      "buttons": [
+        {
+          "label": "Ouvir",
+          "link": "#"
+        },
+        {
+          "label": "Assistir",
+          "link": "#"
+        }
+      ]
+    },
+    {
+      "title": "NVDNSP",
+      "type": "Álbum",
+      "year": 2026,
+      "cover": "/uploads/nvdnsp.png",
+      "buttons": [
+        {
+          "label": "Ouvir",
+          "link": "#"
+        },
+        {
+          "label": "Assistir",
+          "link": "#"
+        }
+      ]
+    }
+  ]
+}
