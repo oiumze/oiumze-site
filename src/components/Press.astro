@@ -1,0 +1,231 @@
+---
+// Seção Imprensa: título + texto + slider de notícias (imagem + veículo + título da matéria + botão).
+// Slider Swiper (arrastar, roda/trackpad, teclado) com setas em cima e uma notícia por vez (sem pedaço da
+// próxima: a imagem seria de outra notícia). Passa sozinho até qualquer interação com o carrossel.
+// Desktop: imagem à esquerda e texto à direita; mobile: empilhados. Sem JS: rolagem horizontal nativa.
+// Conteúdo vem do CMS: content/sections/press.json (ver src/content.config.ts).
+import { getEntry } from 'astro:content';
+import ChevronLeft from '@tabler/icons/outline/chevron-left.svg';
+import ChevronRight from '@tabler/icons/outline/chevron-right.svg';
+import { link, paragraphs } from '../lib/content';
+import RollButton from './RollButton.astro';
+import Rnb from './Rnb.astro';
+
+interface Props {
+	id?: string;
+}
+
+const { id = 'imprensa' } = Astro.props;
+const { data } = (await getEntry('press', 'press'))!;
+
+// nome acessível do botão: o texto visível sozinho ("Leia a Matéria") não diz de qual matéria é nem que sai do site
+const buttonLabel = (news: (typeof data.news)[number]) =>
+	`${news.button.label}: ${news.title}, em ${news.outlet}${link(news.button.link).target ? ' (abre em nova aba)' : ''}`;
+---
+
+<section id={id} class="min-h-section scroll-mt-14 bg-yellow-light px-6 pt-[54px] pb-16 text-orange lg:px-12">
+	<div class="mx-auto max-w-[1200px]">
+		<!-- quebras de linha do título vêm do CMS (whitespace-pre-line) -->
+		<h2 class="font-righteous text-4xl leading-[1.05] tracking-[0.02em] whitespace-pre-line uppercase [-webkit-text-stroke:0.05em_currentColor] md:text-6xl">{data.title}</h2>
+		<div class="mt-6 max-w-[48rem] space-y-[1lh] text-xl leading-loose font-medium md:text-2xl">
+			{paragraphs(data.body).map((p) => <p><Rnb text={p} /></p>)}
+		</div>
+
+		<div class="relative mt-10" data-press>
+			<!-- setas: em cima, à direita (o arraste continua valendo) -->
+			<div class="mb-6 flex justify-end gap-3">
+				<button type="button" data-press-prev class="press-arrow" aria-label="Notícia anterior">
+					<ChevronLeft width="28" height="28" stroke-width="2" aria-hidden="true" />
+				</button>
+				<button type="button" data-press-next class="press-arrow" aria-label="Próxima notícia">
+					<ChevronRight width="28" height="28" stroke-width="2" aria-hidden="true" />
+				</button>
+			</div>
+
+			<div>
+				<div class="press-stage">
+					<ul class="press-list" aria-label="Notícias">
+						{data.news.map((news) => (
+							<li class="press-card">
+								<article class="press-article @container">
+									<img src={news.image} alt="" width="588" height="368" loading="lazy" decoding="async" draggable="false" class="aspect-[588/368] w-full object-cover" />
+									<div class="flex flex-col items-start" data-grain-mask="0.85">
+										<p class="font-righteous text-[6cqw] leading-tight tracking-[0.02em] uppercase [-webkit-text-stroke:0.05em_currentColor] md:text-[2.8cqw]">{news.outlet}</p>
+										<h3 class="mt-[2.5cqw] font-righteous text-[6cqw] leading-tight uppercase md:mt-[1cqw] md:text-[2.8cqw]"><Rnb text={news.title} /></h3>
+										<RollButton
+											{...link(news.button.link)}
+											label={news.button.label}
+											aria-label={buttonLabel(news)}
+											bg="var(--color-orange)"
+											fg="var(--color-yellow-light)"
+											hoverBg="var(--color-white)"
+											hoverFg="var(--color-red)"
+											class="press-button mt-[5cqw] px-[6cqw] py-[3cqw] font-reddit-sans text-[5.4cqw] font-semibold md:mt-[2.2cqw] md:px-[3.05cqw] md:py-[1.2cqw] md:text-[2.3cqw]"
+										/>
+									</div>
+								</article>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	/* Slider (Swiper, ver script): uma notícia por vez, na largura toda. Mobile: imagem em cima, texto embaixo;
+	   md+: imagem e texto lado a lado (até 1040px; coluna de texto mais larga que a do layout).
+	   Antes do Swiper iniciar (ou sem JS): rolagem horizontal nativa com snap. */
+	.press-list {
+		display: flex;
+		gap: 0.75rem;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+	}
+	.press-list::-webkit-scrollbar {
+		display: none;
+	}
+	.press-card {
+		flex: 0 0 100%;
+		scroll-snap-align: start;
+	}
+	.press-article {
+		display: flex;
+		flex-direction: column;
+		gap: 5cqw;
+	}
+	@media (width >= 48rem) {
+		.press-list {
+			gap: 2.5rem;
+		}
+		/* imagem 588 : texto 480 (no layout, 340: texto ganhou largura), centralizados na vertical. Fontes em cqw
+		   do bloco: mesmos px do layout de 880px */
+		.press-article {
+			max-width: 1040px;
+			display: grid;
+			grid-template-columns: minmax(0, 588fr) minmax(0, 480fr);
+			align-items: center;
+			gap: 4.4cqw;
+		}
+	}
+	/* o RollButton é flex de largura total e em caixa alta por padrão: aqui só do tamanho do texto e com a
+	   caixa do CMS ("Veja a Entrevista", como no layout) */
+	.press-article :global(.press-button) {
+		display: inline-flex;
+		text-transform: none;
+	}
+
+	/* arrastar não seleciona texto nem puxa a imagem (arraste nativo do navegador) */
+	.press-stage {
+		-webkit-user-select: none;
+		user-select: none;
+		-webkit-touch-callout: none;
+	}
+	.press-stage img {
+		-webkit-user-drag: none;
+	}
+	/* Swiper ativo: ele move a lista por transform (no lugar do swiper.css, que usaria as classes padrão dele) */
+	.press-stage.swiper-initialized {
+		overflow: hidden;
+		touch-action: pan-y;
+	}
+	.swiper-initialized .press-list {
+		gap: 0;
+		overflow: visible;
+		transition-property: transform;
+	}
+
+	.press-arrow {
+		display: grid;
+		place-items: center;
+		width: 3rem;
+		height: 3rem;
+		border: 3px solid var(--color-orange);
+		color: var(--color-orange);
+		transition:
+			background-color 0.2s,
+			color 0.2s,
+			opacity 0.2s;
+	}
+	@media (hover: hover) {
+		.press-arrow:hover {
+			background: var(--color-orange);
+			color: var(--color-yellow-light);
+		}
+	}
+	.press-arrow:active {
+		background: var(--color-orange);
+		color: var(--color-yellow-light);
+	}
+	.press-arrow:focus-visible {
+		outline: 2px solid var(--color-orange);
+		outline-offset: 3px;
+	}
+	/* Swiper desabilita a seta na ponta (classe + atributo disabled) */
+	.press-arrow:disabled {
+		opacity: 0.3;
+		pointer-events: none;
+	}
+	/* tudo cabe: sem setas */
+	[data-press][data-locked] .press-arrow {
+		visibility: hidden;
+	}
+</style>
+
+<script>
+	import Swiper from 'swiper';
+	import { A11y, Autoplay, Keyboard, Mousewheel, Navigation } from 'swiper/modules';
+
+	const press = document.querySelector<HTMLElement>('[data-press]');
+	const stage = press?.querySelector<HTMLElement>('.press-stage');
+	const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+	const DELAY = 6000; // ms em cada notícia
+
+	// sem nada para rolar (uma notícia só), esconde as setas
+	const update = (s: Swiper) => press?.toggleAttribute('data-locked', s.isLocked);
+
+	if (press && stage) {
+		const swiper = new Swiper(stage, {
+			modules: [A11y, Autoplay, Keyboard, Mousewheel, Navigation],
+			// classes próprias: o mesmo markup serve à rolagem nativa sem JS
+			wrapperClass: 'press-list',
+			slideClass: 'press-card',
+			slidesPerView: 1,
+			spaceBetween: 40,
+			// autoplay: depois da última, volta para a primeira
+			rewind: true,
+			speed: 600,
+			grabCursor: true,
+			mousewheel: { forceToAxis: true },
+			keyboard: { enabled: true, onlyInViewport: true },
+			navigation: { prevEl: press.querySelector<HTMLElement>('[data-press-prev]'), nextEl: press.querySelector<HTMLElement>('[data-press-next]') },
+			autoplay: { delay: DELAY, disableOnInteraction: true, pauseOnMouseEnter: true },
+			a11y: {
+				slideLabelMessage: '{{index}} de {{slidesLength}}',
+				prevSlideMessage: 'Notícia anterior',
+				nextSlideMessage: 'Próxima notícia',
+				firstSlideMessage: 'Esta é a primeira notícia',
+				lastSlideMessage: 'Esta é a última notícia',
+			},
+			on: { afterInit: update, lock: update, unlock: update },
+		});
+
+		// Autoplay só com o carrossel na tela e sem preferência por menos movimento. Qualquer interação (toque,
+		// clique, arraste, setas, roda, teclado, foco) desliga de vez; passar o mouse por cima só pausa.
+		let stopped = reduced.matches;
+		const stop = () => {
+			stopped = true;
+			swiper.autoplay.stop();
+		};
+		swiper.autoplay.stop();
+		new IntersectionObserver(([e]) => {
+			if (stopped) return;
+			if (e.isIntersecting) swiper.autoplay.start();
+			else swiper.autoplay.stop();
+		}, { threshold: 0.5 }).observe(press);
+		for (const type of ['pointerdown', 'wheel', 'keydown', 'focusin']) press.addEventListener(type, stop, { passive: true });
+		reduced.addEventListener('change', () => reduced.matches && stop());
+	}
+</script>

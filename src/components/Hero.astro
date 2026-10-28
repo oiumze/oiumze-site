@@ -1,5 +1,10 @@
 ---
+// Conteúdo (imagem de fundo, contorno ligado/desligado, botões) vem do CMS: content/sections/hero.json
+// (ver src/content.config.ts).
+import { getEntry } from 'astro:content';
 import Contorno from '../assets/umze-contorno.svg';
+import Vinyl from '../assets/vinyl-icon.svg';
+import { link } from '../lib/content';
 import Button from './Button.astro';
 
 interface Props {
@@ -8,6 +13,9 @@ interface Props {
 }
 
 const { id = 'inicio', title = 'Início' } = Astro.props;
+const { data } = (await getEntry('hero', 'hero'))!;
+// posição de cada botão no desktop: 2 botões = um de cada lado do contorno; 1 = centralizado
+const ctaPos = data.buttons.length === 1 ? ['cta-center'] : ['cta-left', 'cta-right'];
 
 // Coordenadas em px da foto (1440×968) — a foto e o SVG escalam juntos (object-cover / slice).
 const FOTO = { w: 1440, h: 968 };
@@ -15,28 +23,29 @@ const CONTORNO = { x: 440, y: 52, w: 433 };
 const ESCALAS = [1, 1.1, 1.2];
 
 // Botões no desktop: partindo do centro do contorno menor, a distância de meia largura do maior + folga de tela
-// (20px no Ouvir, 40px no Assistir);
-// Ouvir termina nesse ponto à esquerda, Assistir começa nele à direita. Valores relativos ao centro da foto.
+// (20px no da esquerda, 40px no da direita);
+// o da esquerda termina nesse ponto, o da direita começa nele. Um botão só fica no centro do contorno.
+// Valores relativos ao centro da foto.
 const centro = CONTORNO.x + CONTORNO.w / 2 - FOTO.w / 2;
 const meia = (CONTORNO.w * Math.max(...ESCALAS)) / 2;
 // --s = px de tela por px da foto (mesma conta do object-cover: maior escala entre largura e altura).
 // Largura = 100cqw da seção (@container); altura = caixa da foto = seção (100svh − menu de 3.5rem) + 72px.
 const ctaStyle = [
 	`--s: max(100cqw / ${FOTO.w}, (100svh - 3.5rem + 72px) / ${FOTO.h})`,
-	`--cta-ouvir: calc(50cqw - var(--s) * ${centro - meia} + 20px)`,
-	`--cta-assistir: calc(50cqw + var(--s) * ${centro + meia} + 40px)`,
+	`--cta-left: calc(50cqw - var(--s) * ${centro - meia} + 20px)`,
+	`--cta-right: calc(50cqw + var(--s) * ${centro + meia} + 40px)`,
+	`--cta-center: calc(50cqw + var(--s) * ${centro})`,
 ].join('; ');
 ---
 
 <!-- título só via aria-label -->
 <section id={id} aria-label={title} data-hero class="@container relative isolate min-h-section scroll-mt-14 overflow-hidden">
 	<!-- sem a classe "hero": é um componente do daisyUI (grid centralizado) e encolhia o bloco dos botões; estilos usam [data-hero] -->
-	<!-- imagem de fundo: <img> com srcset (1x/2x) em vez de background-image para o navegador escolher a densidade e priorizar o carregamento (LCP).
+	<!-- imagem de fundo: <img> em vez de background-image para priorizar o carregamento (LCP).
 	     Começa 72px acima da seção (overflow-hidden esconde): o enquadramento parte de 72px do topo da foto, sem vão embaixo
 	     No layout empilhado (mobile, ver .hero-media) a foto e o SVG ficam 120px mais largos que a tela, para a direita: o centro do corte anda 60px, foto e contorno vão 60px para a direita -->
 	<img
-		src="/images/hero-01.png"
-		srcset="/images/hero-01.png 1x, /images/hero-01@2x.png 2x"
+		src={data.image}
 		width="1440"
 		height="968"
 		alt=""
@@ -49,6 +58,7 @@ const ctaStyle = [
 	<!-- contorno por cima da foto: mesma caixa da <img> e viewBox com as dimensões da foto; "xMidYMin slice" = object-cover + object-top,
 	     então o contorno acompanha a foto em qualquer viewport. x/y = posição do contorno nas coordenadas da foto (1440×968)
 	     data-grain-mask: o grão também entra como máscara nas linhas (overlay quase não aparece no amarelo), ver Grain.astro -->
+	{data.show_outline && (
 	<svg
 		id="hero-contorno"
 		data-grain-mask="0.5"
@@ -68,12 +78,12 @@ const ctaStyle = [
 			</g>
 		))}
 	</svg>
+	)}
 	<!-- chamadas. Mobile: empilhadas no centro da imagem, menores e com fundo preto a 15% (ver <style>). Desktop: a 97px da base, posicionadas pelo contorno (ver ctaStyle);
 	     se algum botão sair da tela, o script põe data-stack na seção e ela volta para o layout mobile (botões e foto).
 	     data-grain-mask: grão como máscara nos botões (branco/amarelo claro não pegam o overlay), ver Grain.astro -->
 	<div id="hero-ctas" data-grain-mask="0.85" class="ctas flex min-h-section flex-col items-center justify-center gap-4 px-6" style={ctaStyle}>
-		<Button href="#" label="Ouvir" class="cta-ouvir" />
-		<Button href="#" label="Assistir" class="cta-assistir" />
+		{data.buttons.map((button, i) => <Button {...link(button.link)} label={button.label} class={ctaPos[i]} />)}
 	</div>
 	<!-- ir para a próxima seção (rolagem suave vem do motion-safe:scroll-smooth no <html>) -->
 	<a
@@ -81,10 +91,8 @@ const ctaStyle = [
 		aria-label="Ir para a próxima seção"
 		class="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center text-yellow-light transition-opacity hover:opacity-70"
 	>
-		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-7">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-			<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-		</svg>
+		<!-- vinil: 24px ≈ a largura visível do olho que estava aqui (20/24 de 28px); mb-2 separa das setas; gira devagar (parado com reduced motion); cor via currentColor -->
+		<Vinyl width="24" height="24" aria-hidden="true" class="mb-2 motion-safe:animate-[spin_6s_linear_infinite]" />
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-5">
 			<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
 		</svg>
@@ -116,16 +124,19 @@ const ctaStyle = [
 			display: block;
 			padding: 0;
 		}
-		[data-hero]:not([data-stack]) .ctas > :global(.cta-ouvir),
-		[data-hero]:not([data-stack]) .ctas > :global(.cta-assistir) {
+		[data-hero]:not([data-stack]) .ctas > :global(a) {
 			position: absolute;
 			bottom: 97px;
 		}
-		[data-hero]:not([data-stack]) .ctas > :global(.cta-ouvir) {
-			right: var(--cta-ouvir);
+		[data-hero]:not([data-stack]) .ctas > :global(.cta-left) {
+			right: var(--cta-left);
 		}
-		[data-hero]:not([data-stack]) .ctas > :global(.cta-assistir) {
-			left: var(--cta-assistir);
+		[data-hero]:not([data-stack]) .ctas > :global(.cta-right) {
+			left: var(--cta-right);
+		}
+		[data-hero]:not([data-stack]) .ctas > :global(.cta-center) {
+			left: var(--cta-center);
+			translate: -50% 0;
 		}
 	}
 </style>

@@ -12,20 +12,170 @@ media_folder: /public/uploads
 public_folder: /uploads
 
 collections:
-  - name: posts
-    label: Posts
-    label_singular: Post
-    folder: /content/posts
-    create: true
-    fields:
-      - { label: Title, name: title, widget: string }
-      - { label: Date, name: date, widget: datetime, time_format: false }
-      - { label: Body, name: body, widget: richtext }
-  - name: gallery
-    label: Galeria de Fotos
-    label_singular: Foto
-    folder: /content/gallery
-    create: true
-    fields:
-      - { label: Título, name: title, widget: string }
-      - { label: Imagem, name: image, widget: image }
+  # Seções da página inicial: um JSON por seção em /content/sections (lido por src/content.config.ts).
+  # Mudou um campo aqui? Atualize o schema lá também.
+  - name: sections
+    label: Seções do site
+    label_singular: Seção
+    format: json
+    files:
+      - name: hero
+        label: Início (Hero)
+        file: content/sections/hero.json
+        fields:
+          - label: Imagem de fundo
+            name: image
+            widget: image
+            hint: Proporção de 1440 × 968. Envie com 2880 px de largura. O rosto/corpo deve ficar no centro, perto do topo.
+          - label: Mostrar contorno
+            name: show_outline
+            widget: boolean
+            default: true
+            hint: O contorno amarelo foi desenhado para a foto atual. Ao trocar a foto, desligue (ou peça um contorno novo).
+          - label: Botões
+            name: buttons
+            widget: list
+            label_singular: Botão
+            summary: '{{label}}'
+            required: false
+            max: 2
+            hint: Até 2. No computador, o 1º fica à esquerda e o 2º à direita do contorno; um só fica centralizado.
+            fields:
+              - { label: Texto do botão, name: label, widget: string, hint: 'Ex.: Ouvir, Assistir' }
+              - { label: Link, name: link, widget: string }
+      - name: about
+        label: Sobre
+        file: content/sections/about.json
+        fields:
+          - { label: Título, name: title, widget: string }
+          - label: Texto
+            name: body
+            widget: text
+            hint: Separe os parágrafos com uma linha em branco.
+          - label: Foto
+            name: photo
+            widget: image
+            hint: Proporção de 486 × 513 (quase quadrada, um pouco mais alta). Envie com pelo menos 972 px de largura.
+          - label: Descrição da foto
+            name: photo_alt
+            widget: string
+            hint: Para leitores de tela. Descreva o que aparece na foto.
+          - label: Redes sociais
+            name: socials
+            widget: object
+            hint: Deixe vazio para esconder o ícone da rede.
+            fields:
+              - { label: Instagram, name: instagram, widget: string, required: false }
+              - { label: TikTok, name: tiktok, widget: string, required: false }
+              - { label: Spotify, name: spotify, widget: string, required: false }
+              - { label: X (Twitter), name: x, widget: string, required: false }
+              - label: E-mail
+                name: email
+                widget: string
+                required: false
+                hint: 'Só o endereço (ex.: contato@umze.com.br).'
+          - label: Link do Press Kit
+            name: press_kit
+            widget: string
+            required: false
+            hint: Deixe vazio para esconder o botão.
+          - label: Link da Merch
+            name: merch
+            widget: string
+            required: false
+            hint: Deixe vazio para esconder o botão.
+      - name: my-sound
+        label: Meu Som
+        file: content/sections/my-sound.json
+        fields:
+          - { label: Título, name: title, widget: string }
+          - label: Texto
+            name: body
+            widget: text
+            hint: Separe os parágrafos com uma linha em branco.
+          - label: Lançamentos
+            name: songs
+            widget: list
+            label_singular: Lançamento
+            summary: '{{title}} ({{type}}, {{year}})'
+            hint: Na ordem em que aparecem no slider. Arraste para reordenar.
+            fields:
+              - { label: Título, name: title, widget: string }
+              - { label: Tipo, name: type, widget: select, options: [EP, Single, Álbum] }
+              - { label: Ano de lançamento, name: year, widget: number, value_type: int }
+              - label: Capa
+                name: cover
+                widget: image
+                hint: Quadrada. Envie com pelo menos 690 × 690 px.
+              - label: Botões
+                name: buttons
+                widget: list
+                label_singular: Botão
+                summary: '{{label}}'
+                required: false
+                fields:
+                  - { label: Texto do botão, name: label, widget: string, hint: 'Ex.: Ouvir, Assistir' }
+                  - { label: Link, name: link, widget: string }
+      - name: gallery
+        label: Galeria
+        file: content/sections/gallery.json
+        fields:
+          - { label: Título, name: title, widget: string }
+          - label: Fotos
+            name: photos
+            widget: list
+            label_singular: Foto
+            summary: '{{caption}}'
+            hint: Aparecem soltas na seção, nesta ordem (a primeira fica por baixo). Quem visita pode arrastar e sobrepor.
+            fields:
+              - { label: Imagem, name: image, widget: image, hint: 'Envie com pelo menos 900 px de largura.' }
+              - label: Nome na janela
+                name: caption
+                widget: string
+                required: false
+                hint: 'Texto da barra da janela (ex.: shoot01.jpeg).'
+              - label: Descrição da foto
+                name: alt
+                widget: string
+                hint: Para leitores de tela. Descreva o que aparece na foto.
+              - label: Mostrar como janela
+                name: window
+                widget: boolean
+                default: true
+                hint: Desligado, a foto aparece solta, sem a barra (como uma foto física).
+      - name: press
+        label: Imprensa
+        file: content/sections/press.json
+        fields:
+          - label: Título
+            name: title
+            widget: text
+            hint: Cada linha deste campo vira uma linha do título.
+          - label: Texto
+            name: body
+            widget: text
+            hint: Separe os parágrafos com uma linha em branco.
+          - label: Notícias
+            name: news
+            widget: list
+            label_singular: Notícia
+            summary: '{{outlet}}: {{title}}'
+            hint: Na ordem em que aparecem no slider. Arraste para reordenar.
+            fields:
+              - { label: Veículo, name: outlet, widget: string, hint: 'Ex.: GRAMOFONE ATIVO' }
+              - { label: Título da matéria, name: title, widget: string }
+              - label: Imagem
+                name: image
+                widget: image
+                hint: Proporção de 1176 × 736 (paisagem). Envie com pelo menos 1176 px de largura.
+              - label: Botão
+                name: button
+                widget: object
+                fields:
+                  - { label: Texto do botão, name: label, widget: string, hint: 'Ex.: Leia a Matéria, Veja a Entrevista' }
+                  - { label: Link, name: link, widget: string }
+      - name: footer
+        label: Rodapé
+        file: content/sections/footer.json
+        fields:
+          - { label: Frase de encerramento, name: body, widget: text }

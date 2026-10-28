@@ -1,0 +1,114 @@
+---
+// Rodapé compacto: frase + chamadas (ouvir / press kit) e redes; embaixo, a assinatura "UMZÉ" em contorno (o
+// mesmo traço amarelo do contorno do Hero), copyright e voltar ao topo. Sem lista de seções: o menu fixo já
+// leva a todas. Fundo preto; a linha vermelha no topo repete a borda do menu.
+// Frase vem do CMS (content/sections/footer.json); links de redes, e-mail e press kit, do Sobre.
+import { getEntry } from 'astro:content';
+import Vinyl from '../assets/vinyl-icon.svg';
+import { link } from '../lib/content';
+import { getSocials } from '../lib/socials';
+import RollButton from './RollButton.astro';
+
+const { data } = (await getEntry('footer', 'footer'))!;
+const { data: about } = (await getEntry('about', 'about'))!;
+const socials = await getSocials();
+const spotify = socials.find((social) => social.key === 'spotify');
+const year = new Date().getFullYear();
+
+// nome acessível de link que sai do site
+const external = (href: string, label: string) => (link(href).target ? `${label} (abre em nova aba)` : label);
+---
+
+<footer class="relative overflow-hidden bg-black px-6 text-yellow-light shadow-[inset_0_2px_0_var(--color-red)] lg:px-12">
+	<div class="mx-auto max-w-[1200px] pt-12 pb-6 md:pt-14">
+		<div class="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
+			<!-- encerramento + chamadas -->
+			<div>
+				<h2 class="max-w-[22ch] font-righteous text-3xl leading-tight md:text-4xl">{data.body}</h2>
+				<div class="mt-6 flex flex-wrap gap-4" data-grain-mask="0.85">
+					{spotify && (
+						<RollButton
+							{...link(spotify.href)}
+							label="Ouvir agora"
+							aria-label={external(spotify.href, 'Ouvir agora no Spotify')}
+							bg="var(--color-yellow-light)"
+							fg="var(--color-black)"
+							hoverBg="var(--color-white)"
+							hoverFg="var(--color-red)"
+							class="footer-cta px-5 py-3 font-righteous text-2xl"
+						/>
+					)}
+					{about.press_kit && (
+						<RollButton
+							{...link(about.press_kit)}
+							label="Press Kit"
+							aria-label={external(about.press_kit, 'Press Kit')}
+							bg="transparent"
+							fg="var(--color-yellow-light)"
+							hoverBg="var(--color-white)"
+							hoverFg="var(--color-red)"
+							class="footer-cta border-3 border-yellow-light px-5 py-[calc(0.75rem-3px)] font-righteous text-2xl"
+						/>
+					)}
+				</div>
+			</div>
+
+			<!-- redes (e-mail incluso) -->
+			{socials.length > 0 && (
+				<div>
+					<h3 class="footer-label">Redes e contato</h3>
+					<ul class="mt-4 flex flex-wrap gap-3" data-grain-mask="0.85">
+						{socials.map(({ label, href, Icon }) => (
+							<li>
+								<a
+									{...link(href)}
+									aria-label={external(href, label)}
+									class="flex size-11 items-center justify-center border-2 border-yellow-light transition-colors hover:bg-yellow-light hover:text-black active:bg-yellow-light active:text-black"
+								>
+									<Icon width="26" height="26" stroke-width="1.5" aria-hidden="true" />
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+		</div>
+
+		<!-- assinatura em contorno (non-scaling-stroke: traço fino em qualquer tamanho; viewBox com altura para o
+		     acento, a máscara do grão corta o que passa da caixa) + copyright + voltar ao topo, numa linha só -->
+		<div class="mt-10 flex flex-col items-center gap-5 border-t border-yellow-light/20 pt-6 text-sm md:flex-row md:justify-between">
+			<svg viewBox="0 0 1000 320" aria-hidden="true" class="h-12 w-auto" data-grain-mask="0.5">
+				<text
+					x="0"
+					y="310"
+					textLength="1000"
+					lengthAdjust="spacingAndGlyphs"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"
+					vector-effect="non-scaling-stroke"
+					class="font-righteous text-[330px] uppercase"
+				>UMZÉ</text>
+			</svg>
+			<p>© {year} UMZÉ. Todos os direitos reservados.</p>
+			<a href="#inicio" class="group flex items-center gap-3 font-righteous text-base uppercase hover:text-yellow-strong">
+				Voltar ao topo
+				<Vinyl width="22" height="22" aria-hidden="true" class="motion-safe:animate-[spin_6s_linear_infinite] motion-safe:group-hover:animate-[spin_1.5s_linear_infinite]" />
+			</a>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.footer-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: color-mix(in oklab, var(--color-yellow-light) 60%, transparent);
+	}
+	/* chamadas do rodapé: só do tamanho do texto (o RollButton é largura total por padrão) */
+	:global(.footer-cta) {
+		display: inline-flex;
+	}
+</style>

@@ -1,0 +1,17 @@
+---
+// Texto do CMS com "RnB" sempre com o n minúsculo, mesmo em título com caixa alta (uppercase do CSS): o n vai num
+// <span> com text-transform: none. "R&B" (que a fonte Righteous não desenha bem) também vira "RnB".
+interface Props {
+	text: string;
+}
+
+const { text } = Astro.props;
+const parts = text.split(/\bR(?:&|n|N)B\b/);
+---
+
+{parts.map((part, i) => (
+	<>
+		{part}
+		{i < parts.length - 1 && <>R<span class="normal-case">n</span>B</>}
+	</>
+))}

@@ -1,0 +1,10 @@
+{
+  "title": "Galeria",
+  "photos": [
+    { "image": "/uploads/teste-1.png", "caption": "em_bh.jpeg", "alt": "Foto de teste", "window": true },
+    { "image": "/uploads/teste-1.png", "caption": "nvdnsp.jpeg", "alt": "Foto de teste", "window": false },
+    { "image": "/uploads/teste-1.png", "caption": "shoot01.jpeg", "alt": "Foto de teste", "window": true },
+    { "image": "/uploads/teste-1.png", "caption": "shoot02.jpeg", "alt": "Foto de teste", "window": true },
+    { "image": "/uploads/teste-1.png", "caption": "camarim.jpeg", "alt": "Foto de teste", "window": true }
+  ]
+}

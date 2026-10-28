@@ -3,29 +3,23 @@
 // botões Press Kit / Merch, todos com a mesma largura da coluna (até 486px; 420px no desktop).
 // A coluna é um container: fontes, paddings e espaços em cqw (frações da largura dela, a partir do layout de
 // 486px), então tudo escala junto ao mudar a largura máxima.
-// Ícones: todos do Tabler (outline), para manter o mesmo traço entre eles.
-import Instagram from '@tabler/icons/outline/brand-instagram.svg';
-import Tiktok from '@tabler/icons/outline/brand-tiktok.svg';
-import Spotify from '@tabler/icons/outline/brand-spotify.svg';
-import X from '@tabler/icons/outline/brand-x.svg';
-import Mail from '@tabler/icons/outline/mail.svg';
+// Ícones: todos do Tabler (outline), para manter o mesmo traço entre eles (src/lib/socials.ts).
+// Conteúdo (título, texto, foto, links) vem do CMS: content/sections/about.json (ver src/content.config.ts).
+import { getEntry } from 'astro:content';
+import { getSocials } from '../lib/socials';
+import { link, paragraphs } from '../lib/content';
 import RollButton from './RollButton.astro';
+import Rnb from './Rnb.astro';
 
 interface Props {
 	id?: string;
-	title?: string;
 }
 
-const { id = 'sobre', title = 'Sobre' } = Astro.props;
+const { id = 'sobre' } = Astro.props;
+const { data } = (await getEntry('about', 'about'))!;
 
-// links ainda não definidos
-const redes = [
-	{ label: 'Instagram', href: '#', Icon: Instagram },
-	{ label: 'TikTok', href: '#', Icon: Tiktok },
-	{ label: 'Spotify', href: '#', Icon: Spotify },
-	{ label: 'X (Twitter)', href: '#', Icon: X },
-	{ label: 'E-mail', href: '#', Icon: Mail },
-];
+// ícones fixos; só aparecem as redes com link cadastrado (ver src/lib/socials.ts)
+const socials = await getSocials();
 
 // medidas do layout (coluna de 486px): botão com 77px de altura, fonte de 40px (RollButton usa line-height 1:
 // a altura vem só da fonte + padding)
@@ -38,16 +32,9 @@ const botao = 'w-full py-[3.81cqw] font-righteous text-[8.22cqw]';
 		<div>
 			<!-- bold simulado: Righteous só tem peso 400; contorno na cor do texto engrossa o traço (em em, escala com a fonte)
 			     e um pouco de espaçamento compensa as letras mais grossas -->
-			<h2 class="font-righteous text-4xl tracking-[0.02em] uppercase text-red [-webkit-text-stroke:0.05em_currentColor] md:text-6xl">{title}</h2>
+			<h2 class="font-righteous text-4xl tracking-[0.02em] uppercase text-red [-webkit-text-stroke:0.05em_currentColor] md:text-6xl">{data.title}</h2>
 			<div class="mt-10 max-w-[36rem] space-y-[1lh] text-xl leading-loose md:text-2xl">
-				<p>
-					Através do resgate de sonoridades afrodiaspóricas que embalaram as décadas de 80, UMZÉ propõe uma releitura
-					da cena black através das lentes LGBTQIAPN+.
-				</p>
-				<p>
-					Após sua estreia com CAÇULA (2023), o artista pavimenta o caminho para seu primeiro álbum, NÃO VOU DANÇAR NA
-					SUA PISTA, que aprofunda as intersecções de raça e sexualidade.
-				</p>
+				{paragraphs(data.body).map((p) => <p><Rnb text={p} /></p>)}
 			</div>
 		</div>
 
@@ -63,11 +50,10 @@ const botao = 'w-full py-[3.81cqw] font-righteous text-[8.22cqw]';
 						style="transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1))"
 					>
 						<img
-							src="/images/about-card.png"
-							srcset="/images/about-card.png 1x, /images/about-card@2x.png 2x, /images/about-card@3x.png 3x"
+							src={data.photo}
 							width="486"
 							height="513"
-							alt="Umzé deitado sobre um tapete, falando ao telefone"
+							alt={data.photo_alt}
 							loading="lazy"
 							decoding="async"
 							class="block h-auto w-full"
@@ -86,11 +72,14 @@ const botao = 'w-full py-[3.81cqw] font-righteous text-[8.22cqw]';
 				<!-- data-grain-mask: o overlay do grão quase não aparece no amarelo claro/vermelho, então ele entra como
 				     máscara nos ícones e botões (ver Grain.astro) -->
 				<div data-grain-mask="0.85" class="flex flex-col gap-[3.7cqw]">
-					<ul class="grid grid-cols-5 gap-[4.94cqw]"><!-- 24px em 486px -->
-						{redes.map(({ label, href, Icon }) => (
-							<li>
+					<!-- ícones sempre do tamanho de 5 lado a lado (24px de espaço em 486px); com menos redes, as das pontas
+					     encostam nas bordas da foto e o resto se distribui entre elas (uma só: centralizada) -->
+					{socials.length > 0 && (
+					<ul class:list={['flex', socials.length > 1 ? 'justify-between' : 'justify-center']}>
+						{socials.map(({ label, href, Icon }) => (
+							<li class="w-[calc((100%-4*4.94cqw)/5)]">
 								<a
-									href={href}
+									{...link(href)}
 									aria-label={label}
 									class="flex aspect-square items-center justify-center border-2 border-yellow-light transition-colors hover:bg-yellow-light hover:text-black active:bg-yellow-light active:text-black"
 								>
@@ -100,9 +89,14 @@ const botao = 'w-full py-[3.81cqw] font-righteous text-[8.22cqw]';
 							</li>
 						))}
 					</ul>
+					)}
 
-					<RollButton href="#" label="Press Kit" bg="var(--color-red)" fg="var(--color-yellow-light)" hoverBg="var(--color-white)" hoverFg="var(--color-red)" class={botao} />
-					<RollButton href="#" label="Merch" bg="var(--color-yellow-light)" fg="var(--color-red)" hoverBg="var(--color-white)" hoverFg="var(--color-red)" class={botao} />
+					{data.press_kit && (
+						<RollButton {...link(data.press_kit)} label="Press Kit" bg="var(--color-red)" fg="var(--color-yellow-light)" hoverBg="var(--color-white)" hoverFg="var(--color-red)" class={botao} />
+					)}
+					{data.merch && (
+						<RollButton {...link(data.merch)} label="Merch" bg="var(--color-yellow-light)" fg="var(--color-red)" hoverBg="var(--color-white)" hoverFg="var(--color-red)" class={botao} />
+					)}
 				</div>
 			</div>
 		</div>
