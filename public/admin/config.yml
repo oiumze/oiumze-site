@@ -23,15 +23,44 @@ collections:
         label: Início (Hero)
         file: content/sections/hero.json
         fields:
+          - label: Fundo
+            name: background
+            widget: select
+            default: image
+            options:
+              - { label: Imagem, value: image }
+              - { label: Vídeo, value: video }
+            hint: Com vídeo, ele toca mudo e em loop no lugar da imagem e do contorno.
           - label: Imagem de fundo
             name: image
             widget: image
-            hint: Proporção de 1440 × 968. Envie com 2880 px de largura. O rosto/corpo deve ficar no centro, perto do topo.
+            required: false
+            hint: Só para fundo em imagem. Proporção de 1440 × 968. Envie com 2880 px de largura. O rosto/corpo deve ficar no centro, perto do topo.
+          - label: Vídeo de fundo (MP4)
+            name: video
+            widget: file
+            required: false
+            hint: Só para fundo em vídeo. MP4 (H.264), sem áudio, 1280 px de largura, trecho curto em loop (até ~5 MB). O vídeo é cortado para cobrir a tela, então deixe o principal no centro.
+          - label: Vídeo de fundo (WebM, opcional)
+            name: video_webm
+            widget: file
+            required: false
+            hint: O mesmo vídeo em WebM (VP9), 1920 px de largura. Mais leve que o MP4 na mesma qualidade; quem não toca WebM (iPhones antigos) usa o MP4.
+          - label: Imagem de espera do vídeo (opcional)
+            name: video_poster
+            widget: image
+            required: false
+            hint: O 1º quadro do vídeo, em WebP com 1920 px de largura (~50 KB). Aparece na hora enquanto o vídeo carrega, sem fundo preto.
           - label: Mostrar contorno
             name: show_outline
             widget: boolean
             default: true
-            hint: O contorno amarelo foi desenhado para a foto atual. Ao trocar a foto, desligue (ou peça um contorno novo).
+            hint: Só com fundo em imagem. O contorno amarelo foi desenhado para a foto atual. Ao trocar a foto, desligue (ou peça um contorno novo).
+          - label: Mostrar botões
+            name: show_buttons
+            widget: boolean
+            default: false
+            hint: 'Desligue para esconder os botões (ex.: Ouvir/Assistir) sem apagá-los.'
           - label: Botões
             name: buttons
             widget: list
