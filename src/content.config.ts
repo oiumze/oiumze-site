@@ -14,8 +14,16 @@ const button = z.object({ label: z.string(), link: z.string() });
 const hero = defineCollection({
 	loader: glob({ pattern: 'hero.json', base }),
 	schema: z.object({
-		image: z.string(),
+		// "video": arquivo de vídeo (em /public/uploads) no fundo, mudo e em loop, no lugar da imagem e do contorno
+		background: z.enum(['image', 'video']).default('image'),
+		image: optional,
+		video: optional,
+		// versão WebM do mesmo vídeo (mais leve); o navegador usa ela quando suporta, senão o MP4
+		video_webm: optional,
+		// 1º quadro do vídeo, mostrado enquanto ele carrega
+		video_poster: optional,
 		show_outline: z.boolean().default(true),
+		show_buttons: z.boolean().default(false),
 		// até 2: no desktop um fica de cada lado do contorno
 		buttons: z.array(button).max(2).default([]),
 	}),
