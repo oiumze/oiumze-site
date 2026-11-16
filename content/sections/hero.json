@@ -4,7 +4,7 @@
   "video": "/uploads/hero.mp4",
   "video_webm": "/uploads/hero.webm",
   "video_poster": "/uploads/hero-poster.webp",
-  "show_outline": true,
+  "show_outline": false,
   "show_buttons": false,
   "buttons": [
     {
