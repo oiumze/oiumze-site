@@ -108,6 +108,13 @@ const footer = defineCollection({
 	loader: glob({ pattern: 'footer.json', base }),
 	schema: z.object({
 		body: z.string(),
+		// até 2: o 1º preenchido, o 2º só com borda
+		buttons: z.array(button).max(2).default([]),
+		// os links das redes vêm do Sobre (src/lib/socials.ts)
+		socials_title: z.string().default('Redes e contato'),
+		// o "© ano" entra antes, automático
+		copyright: z.string().default('UMZÉ. Todos os direitos reservados.'),
+		back_to_top: z.string().default('Voltar ao topo'),
 	}),
 });
 

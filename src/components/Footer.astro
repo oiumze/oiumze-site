@@ -2,7 +2,7 @@
 // Rodapé compacto: frase + chamadas (ouvir / press kit) e redes; embaixo, a assinatura "UMZÉ" em contorno (o
 // mesmo traço amarelo do contorno do Hero), copyright e voltar ao topo. Sem lista de seções: o menu fixo já
 // leva a todas. Fundo preto; a linha vermelha no topo repete a borda do menu.
-// Frase vem do CMS (content/sections/footer.json); links de redes, e-mail e press kit, do Sobre.
+// Textos e botões vêm do CMS (content/sections/footer.json); links de redes e e-mail, do Sobre.
 import { getEntry } from 'astro:content';
 import Vinyl from '../assets/vinyl-icon.svg';
 import { link } from '../lib/content';
@@ -10,9 +10,12 @@ import { getSocials } from '../lib/socials';
 import RollButton from './RollButton.astro';
 
 const { data } = (await getEntry('footer', 'footer'))!;
-const { data: about } = (await getEntry('about', 'about'))!;
 const socials = await getSocials();
-const spotify = socials.find((social) => social.key === 'spotify');
+// 1º botão preenchido, 2º só com borda
+const buttonStyles = [
+	{ bg: 'var(--color-yellow-light)', fg: 'var(--color-black)', class: 'px-5 py-3' },
+	{ bg: 'transparent', fg: 'var(--color-yellow-light)', class: 'border-3 border-yellow-light px-5 py-[calc(0.75rem-3px)]' },
+];
 const year = new Date().getFullYear();
 
 // nome acessível de link que sai do site
@@ -25,38 +28,28 @@ const external = (href: string, label: string) => (link(href).target ? `${label}
 			<!-- encerramento + chamadas -->
 			<div>
 				<h2 class="max-w-[22ch] font-righteous text-3xl leading-tight md:text-4xl">{data.body}</h2>
-				<div class="mt-6 flex flex-wrap gap-4" data-grain-mask="0.85">
-					{spotify && (
-						<RollButton
-							{...link(spotify.href)}
-							label="Ouvir agora"
-							aria-label={external(spotify.href, 'Ouvir agora no Spotify')}
-							bg="var(--color-yellow-light)"
-							fg="var(--color-black)"
-							hoverBg="var(--color-white)"
-							hoverFg="var(--color-red)"
-							class="footer-cta px-5 py-3 font-righteous text-2xl"
-						/>
-					)}
-					{about.press_kit && (
-						<RollButton
-							{...link(about.press_kit)}
-							label="Press Kit"
-							aria-label={external(about.press_kit, 'Press Kit')}
-							bg="transparent"
-							fg="var(--color-yellow-light)"
-							hoverBg="var(--color-white)"
-							hoverFg="var(--color-red)"
-							class="footer-cta border-3 border-yellow-light px-5 py-[calc(0.75rem-3px)] font-righteous text-2xl"
-						/>
-					)}
-				</div>
+				{data.buttons.length > 0 && (
+					<div class="mt-6 flex flex-wrap gap-4" data-grain-mask="0.85">
+						{data.buttons.map((button, i) => (
+							<RollButton
+								{...link(button.link)}
+								label={button.label}
+								aria-label={external(button.link, button.label)}
+								bg={buttonStyles[i].bg}
+								fg={buttonStyles[i].fg}
+								hoverBg="var(--color-white)"
+								hoverFg="var(--color-red)"
+								class={`footer-cta font-righteous text-2xl ${buttonStyles[i].class}`}
+							/>
+						))}
+					</div>
+				)}
 			</div>
 
 			<!-- redes (e-mail incluso) -->
 			{socials.length > 0 && (
 				<div>
-					<h3 class="footer-label">Redes e contato</h3>
+					<h3 class="footer-label">{data.socials_title}</h3>
 					<ul class="mt-4 flex flex-wrap gap-3" data-grain-mask="0.85">
 						{socials.map(({ label, href, Icon }) => (
 							<li>
@@ -90,9 +83,9 @@ const external = (href: string, label: string) => (link(href).target ? `${label}
 					class="font-righteous text-[330px] uppercase"
 				>UMZÉ</text>
 			</svg>
-			<p>© {year} UMZÉ. Todos os direitos reservados.</p>
+			<p>© {year} {data.copyright}</p>
 			<a href="#inicio" class="group flex items-center gap-3 font-righteous text-base uppercase hover:text-yellow-strong">
-				Voltar ao topo
+				{data.back_to_top}
 				<Vinyl width="22" height="22" aria-hidden="true" class="motion-safe:animate-[spin_6s_linear_infinite] motion-safe:group-hover:animate-[spin_1.5s_linear_infinite]" />
 			</a>
 		</div>
