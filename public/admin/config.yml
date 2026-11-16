@@ -208,3 +208,25 @@ collections:
         file: content/sections/footer.json
         fields:
           - { label: Frase de encerramento, name: body, widget: text }
+          - label: Botões
+            name: buttons
+            widget: list
+            label_singular: Botão
+            summary: '{{label}}'
+            required: false
+            max: 2
+            hint: Até 2. O 1º é preenchido e o 2º só tem borda.
+            fields:
+              - { label: Texto do botão, name: label, widget: string, hint: 'Ex.: Ouvir agora, Press Kit' }
+              - { label: Link, name: link, widget: string }
+          - label: Título das redes
+            name: socials_title
+            widget: string
+            default: Redes e contato
+            hint: Os links das redes sociais e do e-mail são editados na seção Sobre (valem para as duas).
+          - label: Texto do copyright
+            name: copyright
+            widget: string
+            default: UMZÉ. Todos os direitos reservados.
+            hint: O "© ano" entra antes, sozinho.
+          - { label: Texto do voltar ao topo, name: back_to_top, widget: string, default: Voltar ao topo }
