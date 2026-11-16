@@ -4,8 +4,8 @@ backend:
   name: github
   repo: oiumze/oiumze-site
   branch: main
-  # OAuth via Vercel functions (src/pages/api). Trocar pelo domínio final quando houver.
-  base_url: https://hmg.umze.com.br
+  # OAuth via Vercel functions (src/pages/api), no domínio de produção.
+  base_url: https://umze.com.br
   auth_endpoint: api/auth
 
 media_folder: /public/uploads
