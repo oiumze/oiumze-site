@@ -1,3 +1,10 @@
 {
-  "body": "Acompanhe os lançamentos, os shows e as novidades de UMZÉ."
+  "body": "Acompanhe os lançamentos, os shows e as novidades de UMZÉ.",
+  "buttons": [
+    { "label": "Ouvir agora", "link": "#" },
+    { "label": "Press Kit", "link": "#" }
+  ],
+  "socials_title": "Redes e contato",
+  "copyright": "UMZÉ. Todos os direitos reservados.",
+  "back_to_top": "Voltar ao topo"
 }
