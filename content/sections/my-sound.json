@@ -10,11 +10,11 @@
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "http://lnk.fuga.com/cacula"
+          "link": "https://lnk.fuga.com/cacula"
         },
         {
           "label": "Assistir",
-          "link": "youtube.com/playlist?list=PL8mMxFwyE2h1LZT5k6i1BV2N8oWgH1WGI&si=7k4PkWyQigZNfM3P"
+          "link": "https://youtube.com/playlist?list=PL8mMxFwyE2h1LZT5k6i1BV2N8oWgH1WGI&si=7k4PkWyQigZNfM3P"
         }
       ]
     },
@@ -26,11 +26,11 @@
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "found.ee/casaaqui"
+          "link": "https://found.ee/casaaqui"
         },
         {
           "label": "Assistir",
-          "link": "#"
+          "link": "https://www.youtube.com/playlist?list=PLOF8NSgg5EVs"
         }
       ]
     },
@@ -42,7 +42,7 @@
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "#"
+          "link": "https://play.mw.fm/corriida"
         }
       ]
     },
@@ -54,11 +54,11 @@
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "#"
+          "link": "https://play.shakemusic.com.br/NAOVOUDANCARNASUAPISTALadoA"
         },
         {
           "label": "Assistir",
-          "link": "#"
+          "link": "https://youtube.com/playlist?list=PLHX9eSQlUfj0&si=kefmYe8dxGv_Kx7i"
         }
       ]
     },
@@ -70,11 +70,11 @@
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "#"
+          "link": "https://play.shakemusic.com.br/NAOVOUDANCARNASUAPISTAalbum"
         },
         {
           "label": "Assistir",
-          "link": "#"
+          "link": "https://youtube.com/playlist?list=PLHX9eSQlUfj0&si=E8i2hBpDgtqYpUc7"
         }
       ]
     }
