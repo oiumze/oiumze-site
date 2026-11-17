@@ -3,46 +3,18 @@
   "body": "Inspirado pela MPB da minha mãe, e pelas rodas de samba e bailes blacks do meu pai, meu som varre diversos gêneros musicais :)",
   "songs": [
     {
-      "title": "Caçula",
-      "type": "EP",
-      "year": 2023,
-      "cover": "/uploads/cacula.png",
+      "title": "NVDNSP",
+      "type": "Álbum",
+      "year": 2026,
+      "cover": "/uploads/nvdnsp.png",
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "https://lnk.fuga.com/cacula"
+          "link": "https://play.shakemusic.com.br/NAOVOUDANCARNASUAPISTAalbum"
         },
         {
           "label": "Assistir",
-          "link": "https://youtube.com/playlist?list=PL8mMxFwyE2h1LZT5k6i1BV2N8oWgH1WGI&si=7k4PkWyQigZNfM3P"
-        }
-      ]
-    },
-    {
-      "title": "casa, aqui",
-      "type": "EP",
-      "year": 2024,
-      "cover": "/uploads/casa-aqui.png",
-      "buttons": [
-        {
-          "label": "Ouvir",
-          "link": "https://found.ee/casaaqui"
-        },
-        {
-          "label": "Assistir",
-          "link": "https://www.youtube.com/playlist?list=PLOF8NSgg5EVs"
-        }
-      ]
-    },
-    {
-      "title": "CORRIIDA",
-      "type": "Single",
-      "year": 2025,
-      "cover": "/uploads/corrida.png",
-      "buttons": [
-        {
-          "label": "Ouvir",
-          "link": "https://play.mw.fm/corriida"
+          "link": "https://youtube.com/playlist?list=PLHX9eSQlUfj0&si=E8i2hBpDgtqYpUc7"
         }
       ]
     },
@@ -63,18 +35,46 @@
       ]
     },
     {
-      "title": "NVDNSP",
-      "type": "Álbum",
-      "year": 2026,
-      "cover": "/uploads/nvdnsp.png",
+      "title": "CORRIIDA",
+      "type": "Single",
+      "year": 2025,
+      "cover": "/uploads/corrida.png",
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "https://play.shakemusic.com.br/NAOVOUDANCARNASUAPISTAalbum"
+          "link": "https://play.mw.fm/corriida"
+        }
+      ]
+    },
+    {
+      "title": "casa, aqui",
+      "type": "EP",
+      "year": 2024,
+      "cover": "/uploads/casa-aqui.png",
+      "buttons": [
+        {
+          "label": "Ouvir",
+          "link": "https://found.ee/casaaqui"
         },
         {
           "label": "Assistir",
-          "link": "https://youtube.com/playlist?list=PLHX9eSQlUfj0&si=E8i2hBpDgtqYpUc7"
+          "link": "https://www.youtube.com/playlist?list=PLOF8NSgg5EVs"
+        }
+      ]
+    },
+    {
+      "title": "Caçula",
+      "type": "EP",
+      "year": 2023,
+      "cover": "/uploads/cacula.png",
+      "buttons": [
+        {
+          "label": "Ouvir",
+          "link": "https://lnk.fuga.com/cacula"
+        },
+        {
+          "label": "Assistir",
+          "link": "https://youtube.com/playlist?list=PL8mMxFwyE2h1LZT5k6i1BV2N8oWgH1WGI&si=7k4PkWyQigZNfM3P"
         }
       ]
     }
