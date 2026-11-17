@@ -10,11 +10,11 @@
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "#"
+          "link": "http://lnk.fuga.com/cacula"
         },
         {
           "label": "Assistir",
-          "link": "#"
+          "link": "youtube.com/playlist?list=PL8mMxFwyE2h1LZT5k6i1BV2N8oWgH1WGI&si=7k4PkWyQigZNfM3P"
         }
       ]
     },
@@ -26,7 +26,7 @@
       "buttons": [
         {
           "label": "Ouvir",
-          "link": "#"
+          "link": "found.ee/casaaqui"
         },
         {
           "label": "Assistir",
