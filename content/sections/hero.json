@@ -1,19 +1,19 @@
 {
   "background": "image",
-  "image": "/uploads/4.png",
+  "image": "/uploads/Instagram post - 77.png",
   "video": "/uploads/hero.mp4",
   "video_webm": "/uploads/hero.webm",
   "video_poster": "/uploads/hero-poster.webp",
   "show_outline": false,
-  "show_buttons": false,
+  "show_buttons": true,
   "buttons": [
     {
       "label": "Ouvir",
-      "link": "#"
+      "link": "play.shakemusic.com.br/NAOVOUMEVENDERPROSEUJOGOISJUD"
     },
     {
       "label": "Assistir",
-      "link": "#"
+      "link": "youtube.com/@oiumze"
     }
   ]
 }
