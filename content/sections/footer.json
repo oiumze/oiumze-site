@@ -1,8 +1,14 @@
 {
   "body": "Acompanhe os lançamentos, os shows e as novidades de UMZÉ.",
   "buttons": [
-    { "label": "Ouvir agora", "link": "#" },
-    { "label": "Press Kit", "link": "#" }
+    {
+      "label": "Ouvir agora",
+      "link": "https://play.shakemusic.com.br/NAOVOUMEVENDERPROSEUJOGOISJUD"
+    },
+    {
+      "label": "Press Kit",
+      "link": "https://drive.google.com/drive/folders/1pAj-3xv0HIWn7a3ng0YsDp6RIrS85H0Y?usp=drive_link"
+    }
   ],
   "socials_title": "Redes e contato",
   "copyright": "UMZÉ. Todos os direitos reservados.",
