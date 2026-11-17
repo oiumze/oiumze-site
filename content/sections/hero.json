@@ -9,11 +9,11 @@
   "buttons": [
     {
       "label": "Ouvir",
-      "link": "play.shakemusic.com.br/NAOVOUMEVENDERPROSEUJOGOISJUD"
+      "link": "https://play.shakemusic.com.br/NAOVOUMEVENDERPROSEUJOGOISJUD"
     },
     {
       "label": "Assistir",
-      "link": "youtube.com/@oiumze"
+      "link": "https://youtube.com/@oiumze"
     }
   ]
 }
